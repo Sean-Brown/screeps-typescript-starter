@@ -5,7 +5,6 @@
 /package-lock.json
 
 # Ignore basic folders
-/dist
 /node_modules
 
 # TypeScript definitions installed by Typings
