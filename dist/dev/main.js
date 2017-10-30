@@ -1535,6 +1535,7 @@ exports.run = run;
 function _buildMissingCreeps(room, creeps) {
     var bodyParts;
     var harvesters = _.filter(creeps, function (creep) { return creep.memory.role === "harvester"; });
+    var builders = _.filter(creeps, function (creep) { return creep.memory.role === "builder"; });
     var spawns = room.find(FIND_MY_SPAWNS, {
         filter: function (spawn) {
             return spawn.spawning === null;
@@ -1554,6 +1555,12 @@ function _buildMissingCreeps(room, creeps) {
         }
         _.each(spawns, function (spawn) {
             _spawnCreep(spawn, bodyParts, "harvester");
+        });
+    }
+    if (builders.length < 1 && room.energyAvailable > 800) {
+        bodyParts = [WORK, WORK, WORK, MOVE, MOVE];
+        _.each(spawns, function (spawn) {
+            _spawnCreep(spawn, bodyParts, "builder");
         });
     }
 }

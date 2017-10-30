@@ -37,6 +37,7 @@ function _buildMissingCreeps(room: Room, creeps: Creep[]) {
 
   // Iterate through each creep and push them into the role array.
   const harvesters = _.filter(creeps, (creep) => creep.memory.role === "harvester");
+  const builders = _.filter(creeps, (creep) => creep.memory.role === "builder");
 
   const spawns: Spawn[] = room.find<Spawn>(FIND_MY_SPAWNS, {
     filter: (spawn: Spawn) => {
@@ -59,6 +60,12 @@ function _buildMissingCreeps(room: Room, creeps: Creep[]) {
 
     _.each(spawns, (spawn: Spawn) => {
       _spawnCreep(spawn, bodyParts, "harvester");
+    });
+  }
+  if (builders.length < 1 && room.energyAvailable > 800) {
+    bodyParts = [WORK, WORK, WORK, MOVE, MOVE];
+    _.each(spawns, (spawn: Spawn) => {
+      _spawnCreep(spawn, bodyParts, "builder");
     });
   }
 }
