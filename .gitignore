@@ -13,6 +13,7 @@
 
 # Screeps config file
 /config.json
+/config/credentials.json
 
 # code coverage directory
 /coverage
