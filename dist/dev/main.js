@@ -1581,7 +1581,7 @@ function _buildMissingCreeps(room, creeps) {
             log_1.log.info("Spawn: " + spawns[0].name);
         }
     }
-    if (harvesters.length < 2) {
+    if (harvesters.length < (room.energyCapacityAvailable % 100)) {
         if (harvesters.length < 1 || room.energyCapacityAvailable <= 800) {
             bodyParts = [WORK, WORK, CARRY, MOVE];
         }
@@ -1592,7 +1592,7 @@ function _buildMissingCreeps(room, creeps) {
             _spawnCreep(spawn, bodyParts, roles_1.Roles.Harvester);
         });
     }
-    if (builders.length < 1 && harvesters.length > 1) {
+    if (builders.length < 10 && builders.length < harvesters.length) {
         bodyParts = [WORK, CARRY, MOVE];
         _.each(spawns, function (spawn) {
             _spawnCreep(spawn, bodyParts, roles_1.Roles.Builder);

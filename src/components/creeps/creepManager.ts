@@ -56,7 +56,7 @@ function _buildMissingCreeps(room: Room, creeps: Creep[]) {
     }
   }
 
-  if (harvesters.length < 2) {
+  if (harvesters.length < (room.energyCapacityAvailable % 100)) {
     if (harvesters.length < 1 || room.energyCapacityAvailable <= 800) {
       bodyParts = [WORK, WORK, CARRY, MOVE];
     } else if (room.energyCapacityAvailable > 800) {
@@ -67,7 +67,7 @@ function _buildMissingCreeps(room: Room, creeps: Creep[]) {
       _spawnCreep(spawn, bodyParts, Roles.Harvester);
     });
   }
-  if (builders.length < 1 && harvesters.length > 1) {
+  if (builders.length < 10 && builders.length < harvesters.length) {
     bodyParts = [WORK, CARRY, MOVE];
     _.each(spawns, (spawn: Spawn) => {
       _spawnCreep(spawn, bodyParts, Roles.Builder);
