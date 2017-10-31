@@ -1807,20 +1807,26 @@ function run(creep) {
     if (creep.memory.repairing) {
         var structures = creep.room.find(FIND_MY_STRUCTURES);
         if (structures.length) {
+            console.info("repairing structures");
             structures = creepActions.sortMostNeedingRepair(structures);
             creepActions.moveToRepair(creep, structures[0]);
         }
         else {
             var constructionSites = creep.room.find(FIND_MY_CONSTRUCTION_SITES);
             if (constructionSites.length) {
+                console.info("repairing construction sites");
                 constructionSites = creepActions.sortClosestConstructionSites(creep, constructionSites);
                 creepActions.moveToConstructionSite(creep, constructionSites[0]);
             }
             else {
                 var spawns = creep.room.find(FIND_MY_SPAWNS);
                 if (spawns.length) {
+                    console.info("repairing spawns");
                     spawns = creepActions.sortMostNeedingRepair(spawns);
                     creepActions.moveToRepair(creep, spawns[0]);
+                }
+                else {
+                    console.info("repairing nothing");
                 }
             }
         }
