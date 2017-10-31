@@ -497,8 +497,30 @@ exports.compareByGeneratedPositionsInflated = compareByGeneratedPositionsInflate
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+var logLevels_1 = __webpack_require__(4);
+exports.ENABLE_DEBUG_MODE = true;
+exports.USE_PROFILER = true;
+exports.DEFAULT_MIN_LIFE_BEFORE_NEEDS_REFILL = 700;
+exports.LOG_LEVEL = logLevels_1.LogLevels.DEBUG;
+exports.LOG_PRINT_TICK = true;
+exports.LOG_PRINT_LINES = true;
+exports.LOG_LOAD_SOURCE_MAP = true;
+exports.LOG_MAX_PAD = 100;
+exports.LOG_VSC = { repo: "@@_repo_@@", revision: "", valid: false };
+exports.LOG_VSC_URL_TEMPLATE = function (path, line) {
+    return exports.LOG_VSC.repo + "/blob/" + exports.LOG_VSC.revision + "/" + path + "#" + line;
+};
+
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
 var source_map_1 = __webpack_require__(21);
-var Config = __webpack_require__(2);
+var Config = __webpack_require__(1);
 var logLevels_1 = __webpack_require__(4);
 var stackLineRe = /([^ ]*) \(([^:]*):([0-9]*):([0-9]*)\)/;
 function resolve(fileLine) {
@@ -682,36 +704,14 @@ global.log = exports.log;
 
 
 /***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var logLevels_1 = __webpack_require__(4);
-exports.ENABLE_DEBUG_MODE = true;
-exports.USE_PROFILER = true;
-exports.DEFAULT_MIN_LIFE_BEFORE_NEEDS_REFILL = 700;
-exports.LOG_LEVEL = logLevels_1.LogLevels.DEBUG;
-exports.LOG_PRINT_TICK = true;
-exports.LOG_PRINT_LINES = true;
-exports.LOG_LOAD_SOURCE_MAP = true;
-exports.LOG_MAX_PAD = 100;
-exports.LOG_VSC = { repo: "@@_repo_@@", revision: "", valid: false };
-exports.LOG_VSC_URL_TEMPLATE = function (path, line) {
-    return exports.LOG_VSC.repo + "/blob/" + exports.LOG_VSC.revision + "/" + path + "#" + line;
-};
-
-
-/***/ }),
 /* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Config = __webpack_require__(2);
-var log_1 = __webpack_require__(1);
+var Config = __webpack_require__(1);
+var log_1 = __webpack_require__(2);
 function moveTo(creep, target) {
     return creep.moveTo(target);
 }
@@ -1589,9 +1589,9 @@ exports.SourceMapGenerator = SourceMapGenerator;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var CreepManager = __webpack_require__(9);
-var Config = __webpack_require__(2);
+var Config = __webpack_require__(1);
 var Profiler = __webpack_require__(14);
-var log_1 = __webpack_require__(1);
+var log_1 = __webpack_require__(2);
 if (Config.USE_PROFILER) {
     Profiler.enable();
 }
@@ -1627,12 +1627,12 @@ exports.loop = !Config.USE_PROFILER ? mloop : function () { Profiler.wrap(mloop)
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Config = __webpack_require__(2);
+var Config = __webpack_require__(1);
 var builder = __webpack_require__(11);
 var harvester = __webpack_require__(12);
 var repairer = __webpack_require__(13);
 var roles_1 = __webpack_require__(10);
-var log_1 = __webpack_require__(1);
+var log_1 = __webpack_require__(2);
 function run(room) {
     var creeps = room.find(FIND_MY_CREEPS);
     var creepCount = _.size(creeps);
@@ -1814,30 +1814,39 @@ function run(creep) {
                 creepActions.moveToDropEnergy(creep, spawn);
             }
             else {
-                var structures = creep.room.find(FIND_MY_STRUCTURES);
-                if (structures.length) {
-                    structures = creepActions.sortMostNeedingEnergy(structures);
-                    creepActions.moveToDropEnergy(creep, structures[0]);
-                }
-                else {
-                    var constructionSites = creep.room.find(FIND_MY_CONSTRUCTION_SITES);
-                    if (constructionSites.length) {
-                        constructionSites = creepActions.sortClosestConstructionSites(creep, constructionSites);
-                        creepActions.moveToConstructionSite(creep, constructionSites[0]);
-                    }
-                }
+                checkStructures(creep);
             }
+        }
+        else {
+            collectEnergy(creep);
         }
     }
     else {
-        var energySources = creep.room.find(FIND_SOURCES_ACTIVE);
-        if (energySources.length) {
-            energySources = creepActions.sortClosestEnergySources(creep, energySources);
-            creepActions.moveToHarvest(creep, energySources[0]);
-        }
+        collectEnergy(creep);
     }
 }
 exports.run = run;
+function collectEnergy(creep) {
+    var energySources = creep.room.find(FIND_SOURCES_ACTIVE);
+    if (energySources.length) {
+        energySources = creepActions.sortClosestEnergySources(creep, energySources);
+        creepActions.moveToHarvest(creep, energySources[0]);
+    }
+}
+function checkStructures(creep) {
+    var structures = creep.room.find(FIND_MY_STRUCTURES);
+    if (structures.length) {
+        structures = creepActions.sortMostNeedingEnergy(structures);
+        creepActions.moveToDropEnergy(creep, structures[0]);
+    }
+    else {
+        var constructionSites = creep.room.find(FIND_MY_CONSTRUCTION_SITES);
+        if (constructionSites.length) {
+            constructionSites = creepActions.sortClosestConstructionSites(creep, constructionSites);
+            creepActions.moveToConstructionSite(creep, constructionSites[0]);
+        }
+    }
+}
 
 
 /***/ }),
@@ -1848,7 +1857,6 @@ exports.run = run;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var creepActions = __webpack_require__(3);
-var log_1 = __webpack_require__(1);
 function run(creep) {
     if (creep.memory.repairing && creep.carry.energy === 0) {
         creep.memory.repairing = false;
@@ -1861,26 +1869,20 @@ function run(creep) {
     if (creep.memory.repairing) {
         var hitStructures = creep.room.find(FIND_MY_STRUCTURES).filter(function (s) { return s.hits < s.hitsMax; });
         if (hitStructures.length) {
-            log_1.log.info("repairing structures");
             hitStructures = creepActions.sortMostNeedingRepair(hitStructures);
             creepActions.moveToRepair(creep, hitStructures[0]);
         }
         else {
             var constructionSites = creep.room.find(FIND_MY_CONSTRUCTION_SITES);
             if (constructionSites.length) {
-                log_1.log.info("repairing construction sites");
                 constructionSites = creepActions.sortClosestConstructionSites(creep, constructionSites);
                 creepActions.moveToConstructionSite(creep, constructionSites[0]);
             }
             else {
                 var spawns = creep.room.find(FIND_MY_SPAWNS);
                 if (spawns.length) {
-                    log_1.log.info("repairing spawns");
                     spawns = creepActions.sortMostNeedingRepair(spawns);
                     creepActions.moveToRepair(creep, spawns[0]);
-                }
-                else {
-                    log_1.log.info("repairing nothing");
                 }
             }
         }
