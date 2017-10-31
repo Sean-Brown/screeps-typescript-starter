@@ -69,6 +69,28 @@ module.exports =
 /************************************************************************/
 /******/ ([
 /* 0 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var logLevels_1 = __webpack_require__(3);
+exports.ENABLE_DEBUG_MODE = true;
+exports.USE_PROFILER = true;
+exports.DEFAULT_MIN_LIFE_BEFORE_NEEDS_REFILL = 700;
+exports.LOG_LEVEL = logLevels_1.LogLevels.DEBUG;
+exports.LOG_PRINT_TICK = true;
+exports.LOG_PRINT_LINES = true;
+exports.LOG_LOAD_SOURCE_MAP = true;
+exports.LOG_MAX_PAD = 100;
+exports.LOG_VSC = { repo: "@@_repo_@@", revision: "", valid: false };
+exports.LOG_VSC_URL_TEMPLATE = function (path, line) {
+    return exports.LOG_VSC.repo + "/blob/" + exports.LOG_VSC.revision + "/" + path + "#" + line;
+};
+
+
+/***/ }),
+/* 1 */
 /***/ (function(module, exports) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -491,28 +513,6 @@ exports.compareByGeneratedPositionsInflated = compareByGeneratedPositionsInflate
 
 
 /***/ }),
-/* 1 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var logLevels_1 = __webpack_require__(3);
-exports.ENABLE_DEBUG_MODE = true;
-exports.USE_PROFILER = true;
-exports.DEFAULT_MIN_LIFE_BEFORE_NEEDS_REFILL = 700;
-exports.LOG_LEVEL = logLevels_1.LogLevels.DEBUG;
-exports.LOG_PRINT_TICK = true;
-exports.LOG_PRINT_LINES = true;
-exports.LOG_LOAD_SOURCE_MAP = true;
-exports.LOG_MAX_PAD = 100;
-exports.LOG_VSC = { repo: "@@_repo_@@", revision: "", valid: false };
-exports.LOG_VSC_URL_TEMPLATE = function (path, line) {
-    return exports.LOG_VSC.repo + "/blob/" + exports.LOG_VSC.revision + "/" + path + "#" + line;
-};
-
-
-/***/ }),
 /* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -520,7 +520,7 @@ exports.LOG_VSC_URL_TEMPLATE = function (path, line) {
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var source_map_1 = __webpack_require__(20);
-var Config = __webpack_require__(1);
+var Config = __webpack_require__(0);
 var logLevels_1 = __webpack_require__(3);
 var stackLineRe = /([^ ]*) \(([^:]*):([0-9]*):([0-9]*)\)/;
 function resolve(fileLine) {
@@ -730,7 +730,7 @@ var LogLevels;
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-var util = __webpack_require__(0);
+var util = __webpack_require__(1);
 var has = Object.prototype.hasOwnProperty;
 var hasNativeMap = typeof Map !== "undefined";
 
@@ -1004,7 +1004,7 @@ exports.decode = function base64VLQ_decode(aStr, aIndex, aOutParam) {
  */
 
 var base64VLQ = __webpack_require__(5);
-var util = __webpack_require__(0);
+var util = __webpack_require__(1);
 var ArraySet = __webpack_require__(4).ArraySet;
 var MappingList = __webpack_require__(16).MappingList;
 
@@ -1422,7 +1422,7 @@ exports.SourceMapGenerator = SourceMapGenerator;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var CreepManager = __webpack_require__(9);
-var Config = __webpack_require__(1);
+var Config = __webpack_require__(0);
 var Profiler = __webpack_require__(13);
 var log_1 = __webpack_require__(2);
 if (Config.USE_PROFILER) {
@@ -1460,7 +1460,7 @@ exports.loop = !Config.USE_PROFILER ? mloop : function () { Profiler.wrap(mloop)
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Config = __webpack_require__(1);
+var Config = __webpack_require__(0);
 function moveTo(creep, target) {
     return creep.moveTo(target);
 }
@@ -1519,7 +1519,7 @@ exports.creepBuildCost = creepBuildCost;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Config = __webpack_require__(1);
+var Config = __webpack_require__(0);
 var builder = __webpack_require__(11);
 var harvester = __webpack_require__(12);
 var roles_1 = __webpack_require__(10);
@@ -1628,6 +1628,7 @@ exports.Roles = Roles;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+var Config = __webpack_require__(0);
 function run(creep) {
     if (creep.memory.building && creep.carry.energy === 0) {
         creep.memory.building = false;
@@ -1644,11 +1645,17 @@ function run(creep) {
                 creep.moveTo(targets[0], { visualizePathStyle: { stroke: "#ffffff" } });
             }
         }
+        else if (Config.ENABLE_DEBUG_MODE) {
+            console.info("No construction sites available");
+        }
     }
     else {
         var sources = creep.room.find(FIND_SOURCES);
         if (creep.harvest(sources[0]) === ERR_NOT_IN_RANGE) {
             creep.moveTo(sources[0], { visualizePathStyle: { stroke: "#ffaa00" } });
+        }
+        else if (Config.ENABLE_DEBUG_MODE) {
+            console.info("No sources available");
         }
     }
 }
@@ -2226,7 +2233,7 @@ exports.search = function search(aNeedle, aHaystack, aCompare, aBias) {
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-var util = __webpack_require__(0);
+var util = __webpack_require__(1);
 
 /**
  * Determine whether mappingB is after mappingA with respect to generated
@@ -2431,7 +2438,7 @@ exports.quickSort = function (ary, comparator) {
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-var util = __webpack_require__(0);
+var util = __webpack_require__(1);
 var binarySearch = __webpack_require__(15);
 var ArraySet = __webpack_require__(4).ArraySet;
 var base64VLQ = __webpack_require__(5);
@@ -3520,7 +3527,7 @@ exports.IndexedSourceMapConsumer = IndexedSourceMapConsumer;
  */
 
 var SourceMapGenerator = __webpack_require__(6).SourceMapGenerator;
-var util = __webpack_require__(0);
+var util = __webpack_require__(1);
 
 // Matches a Windows-style `\r\n` newline or a `\n` newline used by all other
 // operating systems these days (capturing the result).

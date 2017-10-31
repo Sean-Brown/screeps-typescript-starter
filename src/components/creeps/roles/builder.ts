@@ -1,3 +1,5 @@
+import * as Config from "../../../config/config";
+
 /**
  * Runs builder actions.
  *
@@ -20,11 +22,15 @@ export function run(creep: Creep): void {
       if (creep.build(targets[0]) === ERR_NOT_IN_RANGE) {
         creep.moveTo(targets[0], { visualizePathStyle: { stroke: "#ffffff" } });
       }
+    } else if (Config.ENABLE_DEBUG_MODE) {
+      console.info("No construction sites available");
     }
   } else {
     const sources = creep.room.find(FIND_SOURCES) as Source[];
     if (creep.harvest(sources[0]) === ERR_NOT_IN_RANGE) {
       creep.moveTo(sources[0], { visualizePathStyle: { stroke: "#ffaa00" } });
+    } else if (Config.ENABLE_DEBUG_MODE) {
+      console.info("No sources available");
     }
   }
 }
