@@ -1581,12 +1581,12 @@ function _buildMissingCreeps(room, creeps) {
             log_1.log.info("Spawn: " + spawns[0].name);
         }
     }
-    if (harvesters.length < (room.energyCapacityAvailable % 100)) {
-        if (harvesters.length < 1 || room.energyCapacityAvailable <= 800) {
-            bodyParts = [WORK, WORK, CARRY, MOVE];
-        }
-        else if (room.energyCapacityAvailable > 800) {
+    if ((harvesters.length < (room.energyCapacityAvailable % 100)) || spawns[0].energy === spawns[0].energyCapacity) {
+        if (room.energyCapacityAvailable > 800) {
             bodyParts = [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+        }
+        else {
+            bodyParts = [WORK, WORK, CARRY, MOVE];
         }
         _.each(spawns, function (spawn) {
             _spawnCreep(spawn, bodyParts, roles_1.Roles.Harvester);
