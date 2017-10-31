@@ -2,6 +2,7 @@ import * as Config from "../../config/config";
 
 import * as builder from "./roles/builder";
 import * as harvester from "./roles/harvester";
+import * as repairer from "./roles/repairer";
 
 import { Roles } from "./roles";
 
@@ -28,6 +29,8 @@ export function run(room: Room): void {
       harvester.run(creep);
     } else if (Roles.IsBuilder(creep)) {
       builder.run(creep);
+    } else if (Roles.IsRepairer(creep)) {
+      repairer.run(creep);
     }
   });
 }
@@ -43,6 +46,7 @@ function _buildMissingCreeps(room: Room, creeps: Creep[]) {
   // Iterate through each creep and push them into the role array.
   const harvesters = _.filter(creeps, (creep) => Roles.IsHarvester(creep));
   const builders = _.filter(creeps, (creep) => Roles.IsBuilder(creep));
+  const repairers = _.filter(creeps, (creep) => Roles.IsRepairer(creep));
 
   const spawns: Spawn[] = room.find<Spawn>(FIND_MY_SPAWNS, {
     filter: (spawn: Spawn) => {
@@ -56,7 +60,10 @@ function _buildMissingCreeps(room: Room, creeps: Creep[]) {
     }
   }
 
-  if ((harvesters.length < (room.energyCapacityAvailable % 100)) || (spawns[0] && spawns[0].energy === spawns[0].energyCapacity)) {
+  if (
+    (harvesters.length < (room.energyCapacityAvailable % 100)) ||
+    (spawns[0] && spawns[0].energy === spawns[0].energyCapacity)
+  ) {
     if (room.energyCapacityAvailable > 800) {
       bodyParts = [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
     } else {
@@ -70,6 +77,12 @@ function _buildMissingCreeps(room: Room, creeps: Creep[]) {
     bodyParts = [WORK, CARRY, MOVE];
     _.each(spawns, (spawn: Spawn) => {
       _spawnCreep(spawn, bodyParts, Roles.Builder);
+    });
+  }
+  if (repairers.length < builders.length) {
+    bodyParts = [WORK, CARRY, MOVE];
+    _.each(spawns, (spawn: Spawn) => {
+      _spawnCreep(spawn, bodyParts, Roles.Repairer);
     });
   }
 }

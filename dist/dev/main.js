@@ -64,33 +64,11 @@ module.exports =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 22);
+/******/ 	return __webpack_require__(__webpack_require__.s = 23);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var logLevels_1 = __webpack_require__(3);
-exports.ENABLE_DEBUG_MODE = true;
-exports.USE_PROFILER = true;
-exports.DEFAULT_MIN_LIFE_BEFORE_NEEDS_REFILL = 700;
-exports.LOG_LEVEL = logLevels_1.LogLevels.DEBUG;
-exports.LOG_PRINT_TICK = true;
-exports.LOG_PRINT_LINES = true;
-exports.LOG_LOAD_SOURCE_MAP = true;
-exports.LOG_MAX_PAD = 100;
-exports.LOG_VSC = { repo: "@@_repo_@@", revision: "", valid: false };
-exports.LOG_VSC_URL_TEMPLATE = function (path, line) {
-    return exports.LOG_VSC.repo + "/blob/" + exports.LOG_VSC.revision + "/" + path + "#" + line;
-};
-
-
-/***/ }),
-/* 1 */
 /***/ (function(module, exports) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -513,15 +491,122 @@ exports.compareByGeneratedPositionsInflated = compareByGeneratedPositionsInflate
 
 
 /***/ }),
+/* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var logLevels_1 = __webpack_require__(4);
+exports.ENABLE_DEBUG_MODE = true;
+exports.USE_PROFILER = true;
+exports.DEFAULT_MIN_LIFE_BEFORE_NEEDS_REFILL = 700;
+exports.LOG_LEVEL = logLevels_1.LogLevels.DEBUG;
+exports.LOG_PRINT_TICK = true;
+exports.LOG_PRINT_LINES = true;
+exports.LOG_LOAD_SOURCE_MAP = true;
+exports.LOG_MAX_PAD = 100;
+exports.LOG_VSC = { repo: "@@_repo_@@", revision: "", valid: false };
+exports.LOG_VSC_URL_TEMPLATE = function (path, line) {
+    return exports.LOG_VSC.repo + "/blob/" + exports.LOG_VSC.revision + "/" + path + "#" + line;
+};
+
+
+/***/ }),
 /* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var source_map_1 = __webpack_require__(20);
-var Config = __webpack_require__(0);
-var logLevels_1 = __webpack_require__(3);
+var Config = __webpack_require__(1);
+function moveTo(creep, target) {
+    return creep.moveTo(target);
+}
+exports.moveTo = moveTo;
+function needsRenew(creep) {
+    return (creep.ticksToLive < Config.DEFAULT_MIN_LIFE_BEFORE_NEEDS_REFILL);
+}
+exports.needsRenew = needsRenew;
+function tryRenew(creep, spawn) {
+    return spawn.renewCreep(creep);
+}
+exports.tryRenew = tryRenew;
+function moveToRenew(creep, spawn) {
+    if (tryRenew(creep, spawn) === ERR_NOT_IN_RANGE) {
+        creep.moveTo(spawn);
+    }
+}
+exports.moveToRenew = moveToRenew;
+function getEnergy(creep, roomObject) {
+    var energy = roomObject;
+    if (energy) {
+        if (creep.pos.isNearTo(energy)) {
+            creep.pickup(energy);
+        }
+        else {
+            moveTo(creep, energy.pos);
+        }
+    }
+}
+exports.getEnergy = getEnergy;
+function canWork(creep) {
+    var working = creep.memory.working;
+    if (working && _.sum(creep.carry) === 0) {
+        creep.memory.working = false;
+        return false;
+    }
+    else if (!working && _.sum(creep.carry) === creep.carryCapacity) {
+        creep.memory.working = true;
+        return true;
+    }
+    else {
+        return creep.memory.working;
+    }
+}
+exports.canWork = canWork;
+function creepBuildCost(bodyParts) {
+    return bodyParts.reduce(function (cost, part) { return cost + BODYPART_COST[part]; }, 0);
+}
+exports.creepBuildCost = creepBuildCost;
+function sortClosestConstructionSites(creep, sites) {
+    var creepPos = creep.pos;
+    return sites.sort(function (siteA, siteB) {
+        var lenA = creep.room.findPath(creepPos, siteA.pos).length;
+        var lenB = creep.room.findPath(creepPos, siteB.pos).length;
+        return lenA > lenB ? 1 : lenA < lenB ? -1 : 0;
+    });
+}
+exports.sortClosestConstructionSites = sortClosestConstructionSites;
+function sortStructuresMostNeedingRepair(structures) {
+    return structures.sort(function (sA, sB) {
+        var sAdeficit = sA.hitsMax - sA.hits;
+        var sBdeficit = sB.hitsMax - sB.hits;
+        return sAdeficit > sBdeficit ? 1 : sAdeficit < sBdeficit ? -1 : 0;
+    });
+}
+exports.sortStructuresMostNeedingRepair = sortStructuresMostNeedingRepair;
+function sortClosestEnergySources(creep, energySources) {
+    var creepPos = creep.pos;
+    return energySources.sort(function (sourceA, sourceB) {
+        var lenA = creep.room.findPath(creepPos, sourceA.pos).length;
+        var lenB = creep.room.findPath(creepPos, sourceB.pos).length;
+        return lenA > lenB ? 1 : lenA < lenB ? -1 : 0;
+    });
+}
+exports.sortClosestEnergySources = sortClosestEnergySources;
+
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var source_map_1 = __webpack_require__(21);
+var Config = __webpack_require__(1);
+var logLevels_1 = __webpack_require__(4);
 var stackLineRe = /([^ ]*) \(([^:]*):([0-9]*):([0-9]*)\)/;
 function resolve(fileLine) {
     var split = _.trim(fileLine).match(stackLineRe);
@@ -574,7 +659,7 @@ var Log = (function () {
     }
     Log.loadSourceMap = function () {
         try {
-            var map = __webpack_require__(21);
+            var map = __webpack_require__(22);
             if (map) {
                 Log.sourceMap = new source_map_1.SourceMapConsumer(map);
             }
@@ -704,7 +789,7 @@ global.log = exports.log;
 
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -720,91 +805,6 @@ var LogLevels;
 
 
 /***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var Config = __webpack_require__(0);
-function moveTo(creep, target) {
-    return creep.moveTo(target);
-}
-exports.moveTo = moveTo;
-function needsRenew(creep) {
-    return (creep.ticksToLive < Config.DEFAULT_MIN_LIFE_BEFORE_NEEDS_REFILL);
-}
-exports.needsRenew = needsRenew;
-function tryRenew(creep, spawn) {
-    return spawn.renewCreep(creep);
-}
-exports.tryRenew = tryRenew;
-function moveToRenew(creep, spawn) {
-    if (tryRenew(creep, spawn) === ERR_NOT_IN_RANGE) {
-        creep.moveTo(spawn);
-    }
-}
-exports.moveToRenew = moveToRenew;
-function getEnergy(creep, roomObject) {
-    var energy = roomObject;
-    if (energy) {
-        if (creep.pos.isNearTo(energy)) {
-            creep.pickup(energy);
-        }
-        else {
-            moveTo(creep, energy.pos);
-        }
-    }
-}
-exports.getEnergy = getEnergy;
-function canWork(creep) {
-    var working = creep.memory.working;
-    if (working && _.sum(creep.carry) === 0) {
-        creep.memory.working = false;
-        return false;
-    }
-    else if (!working && _.sum(creep.carry) === creep.carryCapacity) {
-        creep.memory.working = true;
-        return true;
-    }
-    else {
-        return creep.memory.working;
-    }
-}
-exports.canWork = canWork;
-function creepBuildCost(bodyParts) {
-    return bodyParts.reduce(function (cost, part) { return cost + BODYPART_COST[part]; }, 0);
-}
-exports.creepBuildCost = creepBuildCost;
-function sortClosestConstructionSites(creep, sites) {
-    var creepPos = creep.pos;
-    return sites.sort(function (siteA, siteB) {
-        var lenA = creep.room.findPath(creepPos, siteA.pos).length;
-        var lenB = creep.room.findPath(creepPos, siteB.pos).length;
-        return lenA > lenB ? 1 : lenA < lenB ? -1 : 0;
-    });
-}
-exports.sortClosestConstructionSites = sortClosestConstructionSites;
-function sortStructuresMostNeedingRepair(structures) {
-    return structures.sort(function (sA, sB) {
-        var sAdeficit = sA.hitsMax - sA.hits;
-        var sBdeficit = sB.hitsMax - sB.hits;
-        return sAdeficit > sBdeficit ? 1 : sAdeficit < sBdeficit ? -1 : 0;
-    });
-}
-exports.sortStructuresMostNeedingRepair = sortStructuresMostNeedingRepair;
-function sortClosestEnergySources(creep, energySources) {
-    var creepPos = creep.pos;
-    return energySources.sort(function (sourceA, sourceB) {
-        var lenA = creep.room.findPath(creepPos, sourceA.pos).length;
-        var lenB = creep.room.findPath(creepPos, sourceB.pos).length;
-        return lenA > lenB ? 1 : lenA < lenB ? -1 : 0;
-    });
-}
-exports.sortClosestEnergySources = sortClosestEnergySources;
-
-
-/***/ }),
 /* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -815,7 +815,7 @@ exports.sortClosestEnergySources = sortClosestEnergySources;
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-var util = __webpack_require__(1);
+var util = __webpack_require__(0);
 var has = Object.prototype.hasOwnProperty;
 var hasNativeMap = typeof Map !== "undefined";
 
@@ -972,7 +972,7 @@ exports.ArraySet = ArraySet;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-var base64 = __webpack_require__(14);
+var base64 = __webpack_require__(15);
 
 // A single base 64 digit can contain 6 bits of data. For the base 64 variable
 // length quantities we use in the source map spec, the first bit is the sign,
@@ -1089,9 +1089,9 @@ exports.decode = function base64VLQ_decode(aStr, aIndex, aOutParam) {
  */
 
 var base64VLQ = __webpack_require__(6);
-var util = __webpack_require__(1);
+var util = __webpack_require__(0);
 var ArraySet = __webpack_require__(5).ArraySet;
-var MappingList = __webpack_require__(16).MappingList;
+var MappingList = __webpack_require__(17).MappingList;
 
 /**
  * An instance of the SourceMapGenerator represents a source map which is
@@ -1507,9 +1507,9 @@ exports.SourceMapGenerator = SourceMapGenerator;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var CreepManager = __webpack_require__(9);
-var Config = __webpack_require__(0);
-var Profiler = __webpack_require__(13);
-var log_1 = __webpack_require__(2);
+var Config = __webpack_require__(1);
+var Profiler = __webpack_require__(14);
+var log_1 = __webpack_require__(3);
 if (Config.USE_PROFILER) {
     Profiler.enable();
 }
@@ -1545,11 +1545,12 @@ exports.loop = !Config.USE_PROFILER ? mloop : function () { Profiler.wrap(mloop)
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Config = __webpack_require__(0);
+var Config = __webpack_require__(1);
 var builder = __webpack_require__(11);
 var harvester = __webpack_require__(12);
+var repairer = __webpack_require__(13);
 var roles_1 = __webpack_require__(10);
-var log_1 = __webpack_require__(2);
+var log_1 = __webpack_require__(3);
 function run(room) {
     var creeps = room.find(FIND_MY_CREEPS);
     var creepCount = _.size(creeps);
@@ -1564,6 +1565,9 @@ function run(room) {
         else if (roles_1.Roles.IsBuilder(creep)) {
             builder.run(creep);
         }
+        else if (roles_1.Roles.IsRepairer(creep)) {
+            repairer.run(creep);
+        }
     });
 }
 exports.run = run;
@@ -1571,6 +1575,7 @@ function _buildMissingCreeps(room, creeps) {
     var bodyParts;
     var harvesters = _.filter(creeps, function (creep) { return roles_1.Roles.IsHarvester(creep); });
     var builders = _.filter(creeps, function (creep) { return roles_1.Roles.IsBuilder(creep); });
+    var repairers = _.filter(creeps, function (creep) { return roles_1.Roles.IsRepairer(creep); });
     var spawns = room.find(FIND_MY_SPAWNS, {
         filter: function (spawn) {
             return spawn.spawning === null;
@@ -1581,7 +1586,8 @@ function _buildMissingCreeps(room, creeps) {
             log_1.log.info("Spawn: " + spawns[0].name);
         }
     }
-    if ((harvesters.length < (room.energyCapacityAvailable % 100)) || (spawns[0] && spawns[0].energy === spawns[0].energyCapacity)) {
+    if ((harvesters.length < (room.energyCapacityAvailable % 100)) ||
+        (spawns[0] && spawns[0].energy === spawns[0].energyCapacity)) {
         if (room.energyCapacityAvailable > 800) {
             bodyParts = [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
         }
@@ -1596,6 +1602,12 @@ function _buildMissingCreeps(room, creeps) {
         bodyParts = [WORK, CARRY, MOVE];
         _.each(spawns, function (spawn) {
             _spawnCreep(spawn, bodyParts, roles_1.Roles.Builder);
+        });
+    }
+    if (repairers.length < builders.length) {
+        bodyParts = [WORK, CARRY, MOVE];
+        _.each(spawns, function (spawn) {
+            _spawnCreep(spawn, bodyParts, roles_1.Roles.Repairer);
         });
     }
 }
@@ -1646,11 +1658,19 @@ var CreepRoles = (function () {
         enumerable: true,
         configurable: true
     });
+    Object.defineProperty(CreepRoles.prototype, "Repairer", {
+        get: function () { return "repairer"; },
+        enumerable: true,
+        configurable: true
+    });
     CreepRoles.prototype.IsBuilder = function (creep) {
         return creep.memory.role === this.Builder;
     };
     CreepRoles.prototype.IsHarvester = function (creep) {
         return creep.memory.role === this.Harvester;
+    };
+    CreepRoles.prototype.IsRepairer = function (creep) {
+        return creep.memory.role === this.Repairer;
     };
     return CreepRoles;
 }());
@@ -1664,16 +1684,15 @@ exports.Roles = new CreepRoles();
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Config = __webpack_require__(0);
-var creepActions = __webpack_require__(4);
+var creepActions = __webpack_require__(2);
 function run(creep) {
     if (creep.memory.building && creep.carry.energy === 0) {
         creep.memory.building = false;
-        creep.say("🔄 harvest");
+        creep.say("Harvest");
     }
     if (!creep.memory.building && creep.carry.energy === creep.carryCapacity) {
         creep.memory.building = true;
-        creep.say("🚧 build");
+        creep.say("Building");
     }
     if (creep.memory.building) {
         var targets = creep.room.find(FIND_CONSTRUCTION_SITES);
@@ -1683,9 +1702,6 @@ function run(creep) {
                 creep.moveTo(targets[0], { visualizePathStyle: { stroke: "#ffffff" } });
             }
         }
-        else if (Config.ENABLE_DEBUG_MODE) {
-            console.info("No construction sites available");
-        }
     }
     else {
         var sources = creep.room.find(FIND_SOURCES);
@@ -1694,9 +1710,6 @@ function run(creep) {
             if (creep.harvest(sources[0]) === ERR_NOT_IN_RANGE) {
                 creep.moveTo(sources[0], { visualizePathStyle: { stroke: "#ffaa00" } });
             }
-        }
-        else if (Config.ENABLE_DEBUG_MODE) {
-            console.info("No sources available");
         }
     }
 }
@@ -1710,7 +1723,7 @@ exports.run = run;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var creepActions = __webpack_require__(4);
+var creepActions = __webpack_require__(2);
 function run(creep) {
     var spawn = creep.room.find(FIND_MY_SPAWNS)[0];
     if (creepActions.needsRenew(creep)) {
@@ -1769,6 +1782,45 @@ function _moveToConstructionSite(creep, target) {
 
 /***/ }),
 /* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var creepActions = __webpack_require__(2);
+function run(creep) {
+    if (creep.memory.repairing && creep.carry.energy === 0) {
+        creep.memory.repairing = false;
+        creep.say("Harvesting");
+    }
+    if (!creep.memory.repairing && creep.carry.energy === creep.carryCapacity) {
+        creep.memory.repairing = true;
+        creep.say("Repairing");
+    }
+    if (creep.memory.repairing) {
+        var structures = creep.room.find(FIND_MY_STRUCTURES);
+        if (structures.length) {
+            structures = creepActions.sortStructuresMostNeedingRepair(structures);
+            if (creep.repair(structures[0]) === ERR_NOT_IN_RANGE) {
+                creep.moveTo(structures[0], { visualizePathStyle: { stroke: "#ffffff" } });
+            }
+        }
+    }
+    else {
+        var sources = creep.room.find(FIND_SOURCES);
+        if (sources.length) {
+            sources = creepActions.sortClosestEnergySources(creep, sources);
+            if (creep.harvest(sources[0]) === ERR_NOT_IN_RANGE) {
+                creep.moveTo(sources[0], { visualizePathStyle: { stroke: "#ffaa00" } });
+            }
+        }
+    }
+}
+exports.run = run;
+
+
+/***/ }),
+/* 14 */
 /***/ (function(module, exports) {
 
 let usedOnStart = 0;
@@ -2098,7 +2150,7 @@ module.exports = {
 
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -2171,7 +2223,7 @@ exports.decode = function (charCode) {
 
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -2288,7 +2340,7 @@ exports.search = function search(aNeedle, aHaystack, aCompare, aBias) {
 
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -2298,7 +2350,7 @@ exports.search = function search(aNeedle, aHaystack, aCompare, aBias) {
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-var util = __webpack_require__(1);
+var util = __webpack_require__(0);
 
 /**
  * Determine whether mappingB is after mappingA with respect to generated
@@ -2373,7 +2425,7 @@ exports.MappingList = MappingList;
 
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -2493,7 +2545,7 @@ exports.quickSort = function (ary, comparator) {
 
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -2503,11 +2555,11 @@ exports.quickSort = function (ary, comparator) {
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-var util = __webpack_require__(1);
-var binarySearch = __webpack_require__(15);
+var util = __webpack_require__(0);
+var binarySearch = __webpack_require__(16);
 var ArraySet = __webpack_require__(5).ArraySet;
 var base64VLQ = __webpack_require__(6);
-var quickSort = __webpack_require__(17).quickSort;
+var quickSort = __webpack_require__(18).quickSort;
 
 function SourceMapConsumer(aSourceMap) {
   var sourceMap = aSourceMap;
@@ -3581,7 +3633,7 @@ exports.IndexedSourceMapConsumer = IndexedSourceMapConsumer;
 
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -3592,7 +3644,7 @@ exports.IndexedSourceMapConsumer = IndexedSourceMapConsumer;
  */
 
 var SourceMapGenerator = __webpack_require__(7).SourceMapGenerator;
-var util = __webpack_require__(1);
+var util = __webpack_require__(0);
 
 // Matches a Windows-style `\r\n` newline or a `\n` newline used by all other
 // operating systems these days (capturing the result).
@@ -4000,7 +4052,7 @@ exports.SourceNode = SourceNode;
 
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -4009,18 +4061,18 @@ exports.SourceNode = SourceNode;
  * http://opensource.org/licenses/BSD-3-Clause
  */
 exports.SourceMapGenerator = __webpack_require__(7).SourceMapGenerator;
-exports.SourceMapConsumer = __webpack_require__(18).SourceMapConsumer;
-exports.SourceNode = __webpack_require__(19).SourceNode;
+exports.SourceMapConsumer = __webpack_require__(19).SourceMapConsumer;
+exports.SourceNode = __webpack_require__(20).SourceNode;
 
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports) {
 
 module.exports = require("main.js.map");
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__(8);
