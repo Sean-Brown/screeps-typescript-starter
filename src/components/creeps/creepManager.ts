@@ -1,6 +1,7 @@
 import * as Config from "../../config/config";
 
 import * as harvester from "./roles/harvester";
+import * as builder from "./roles/builder";
 
 import { log } from "../../lib/logger/log";
 
@@ -23,6 +24,9 @@ export function run(room: Room): void {
   _.each(creeps, (creep: Creep) => {
     if (creep.memory.role === "harvester") {
       harvester.run(creep);
+    }
+    else if (creep.memory.role === "builder") {
+      builder.run(creep);
     }
   });
 }
@@ -62,7 +66,7 @@ function _buildMissingCreeps(room: Room, creeps: Creep[]) {
       _spawnCreep(spawn, bodyParts, "harvester");
     });
   }
-  if (builders.length < 1 && room.energyCapacityAvailable > 800) {
+  if (builders.length < 1) {
     bodyParts = [WORK, WORK, MOVE];
     _.each(spawns, (spawn: Spawn) => {
       _spawnCreep(spawn, bodyParts, "builder");
