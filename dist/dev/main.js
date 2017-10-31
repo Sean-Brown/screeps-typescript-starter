@@ -778,6 +778,54 @@ function sortMostNeedingRepair(structures) {
     });
 }
 exports.sortMostNeedingRepair = sortMostNeedingRepair;
+function hasDecay(item) {
+    return item.structureType === STRUCTURE_RAMPART ||
+        item.structureType === STRUCTURE_ROAD ||
+        item.structureType === STRUCTURE_POWER_BANK ||
+        item.structureType === STRUCTURE_CONTAINER ||
+        item.structureType === STRUCTURE_PORTAL;
+}
+function isController(item) {
+    return item.structureType === STRUCTURE_CONTROLLER;
+}
+function sortMostNeedingEnergy(structures) {
+    return structures.sort(function (sA, sB) {
+        var aIsController = isController(sA);
+        var bIsController = isController(sB);
+        var aHasDecay = hasDecay(sA);
+        var bHasDecay = hasDecay(sB);
+        var chooseA = (aIsController || aHasDecay);
+        var chooseB = (bIsController || bHasDecay);
+        if (chooseA && !chooseB) {
+            return 1;
+        }
+        else if (chooseB && !chooseA) {
+            return -1;
+        }
+        else if (chooseA && chooseB) {
+            if (aIsController && bIsController) {
+                var aTicks = sA.ticksToDowngrade;
+                var bTicks = sB.ticksToDowngrade;
+                return aTicks < bTicks ? 1 : bTicks > aTicks ? -1 : 0;
+            }
+            else if (aIsController && !bIsController) {
+                return 1;
+            }
+            else if (bIsController && !aIsController) {
+                return -1;
+            }
+            else {
+                var aTicks = sA.ticksToDecay;
+                var bTicks = sB.ticksToDecay;
+                return aTicks < bTicks ? 1 : bTicks < aTicks ? -1 : 0;
+            }
+        }
+        else {
+            return 0;
+        }
+    });
+}
+exports.sortMostNeedingEnergy = sortMostNeedingEnergy;
 function sortClosestEnergySources(creep, energySources) {
     var creepPos = creep.pos;
     return energySources.sort(function (sourceA, sourceB) {
@@ -808,7 +856,7 @@ function moveToDropEnergy(creep, target) {
 }
 exports.moveToDropEnergy = moveToDropEnergy;
 function moveToRepair(creep, target) {
-    log_1.log.info("moving to repair target " + target.id + " " + target.pos);
+    log_1.log.info("moving to repair target " + target.id + " " + target.pos + " " + target.hits + " of " + target.hitsMax);
     if (creep.repair(target) === ERR_NOT_IN_RANGE) {
         moveTo(creep, target.pos);
     }
@@ -1755,25 +1803,28 @@ exports.run = run;
 Object.defineProperty(exports, "__esModule", { value: true });
 var creepActions = __webpack_require__(3);
 function run(creep) {
-    var spawn = creep.room.find(FIND_MY_SPAWNS)[0];
-    if (creepActions.needsRenew(creep)) {
-        creepActions.moveToRenew(creep, spawn);
-    }
-    else if (_.sum(creep.carry) === creep.carryCapacity) {
-        if (spawn.energy < spawn.energyCapacity) {
-            creepActions.moveToDropEnergy(creep, spawn);
+    var spawns = creep.room.find(FIND_MY_SPAWNS);
+    if (spawns.length) {
+        var spawn = spawns[0];
+        if (creepActions.needsRenew(creep)) {
+            creepActions.moveToRenew(creep, spawn);
         }
-        else {
-            var structures = creep.room.find(FIND_MY_STRUCTURES);
-            if (structures.length) {
-                structures = creepActions.sortMostNeedingRepair(structures);
-                creepActions.moveToRepair(creep, structures[0]);
+        else if (_.sum(creep.carry) === creep.carryCapacity) {
+            if (spawn.energy < spawn.energyCapacity) {
+                creepActions.moveToDropEnergy(creep, spawn);
             }
             else {
-                var constructionSites = creep.room.find(FIND_MY_CONSTRUCTION_SITES);
-                if (constructionSites.length) {
-                    constructionSites = creepActions.sortClosestConstructionSites(creep, constructionSites);
-                    creepActions.moveToConstructionSite(creep, constructionSites[0]);
+                var structures = creep.room.find(FIND_MY_STRUCTURES);
+                if (structures.length) {
+                    structures = creepActions.sortMostNeedingRepair(structures);
+                    creepActions.moveToRepair(creep, structures[0]);
+                }
+                else {
+                    var constructionSites = creep.room.find(FIND_MY_CONSTRUCTION_SITES);
+                    if (constructionSites.length) {
+                        constructionSites = creepActions.sortClosestConstructionSites(creep, constructionSites);
+                        creepActions.moveToConstructionSite(creep, constructionSites[0]);
+                    }
                 }
             }
         }

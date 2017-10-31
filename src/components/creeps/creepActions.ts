@@ -123,11 +123,59 @@ export function sortClosestConstructionSites(creep: Creep, sites: ConstructionSi
  * @param {Array<Structure|Spawn>} structures
  * @returns {Array<Structure|Spawn>}
  */
-export function sortMostNeedingRepair(structures: Array<Structure|Spawn>): Structure[] {
+export function sortMostNeedingRepair(structures: Array<Structure|Spawn>): Array<Structure|Spawn> {
   return structures.sort((sA, sB) => {
     const sAdeficit = sA.hitsMax - sA.hits;
     const sBdeficit = sB.hitsMax - sB.hits;
     return sAdeficit > sBdeficit ? 1 : sAdeficit < sBdeficit ? -1 : 0;
+  });
+}
+
+function hasDecay(item: Structure | Spawn): boolean {
+  return item.structureType === STRUCTURE_RAMPART ||
+    item.structureType === STRUCTURE_ROAD ||
+    item.structureType === STRUCTURE_POWER_BANK ||
+    item.structureType === STRUCTURE_CONTAINER ||
+    item.structureType === STRUCTURE_PORTAL;
+}
+
+function isController(item: Structure | Spawn): boolean {
+  return item.structureType === STRUCTURE_CONTROLLER;
+}
+
+interface StructureDecay extends Structure {
+  ticksToDecay: number;
+}
+
+export function sortMostNeedingEnergy(structures: Array<Structure|Spawn>): Array<Structure|Spawn> {
+  return structures.sort((sA, sB) => {
+    const aIsController = isController(sA);
+    const bIsController = isController(sB);
+    const aHasDecay = hasDecay(sA);
+    const bHasDecay = hasDecay(sB);
+    const chooseA = (aIsController || aHasDecay);
+    const chooseB = (bIsController || bHasDecay);
+    if (chooseA && !chooseB) {
+      return 1;
+    } else if (chooseB && !chooseA) {
+      return -1;
+    } else if (chooseA && chooseB) {
+      if (aIsController && bIsController) {
+        const aTicks = (sA as Controller).ticksToDowngrade;
+        const bTicks = (sB as Controller).ticksToDowngrade;
+        return aTicks < bTicks ? 1 : bTicks > aTicks ? -1 : 0;
+      } else if (aIsController && !bIsController) {
+        return 1;
+      } else if (bIsController && !aIsController) {
+        return -1;
+      } else {
+        const aTicks = (sA as StructureDecay).ticksToDecay;
+        const bTicks = (sB as StructureDecay).ticksToDecay;
+        return aTicks < bTicks ? 1 : bTicks < aTicks ? -1 : 0;
+      }
+    } else {
+      return 0;
+    }
   });
 }
 
@@ -167,7 +215,7 @@ export function moveToDropEnergy(creep: Creep, target: Spawn | Structure): void 
 }
 
 export function moveToRepair(creep: Creep, target: Spawn | Structure): void {
-  log.info(`moving to repair target ${target.id} ${target.pos}`);
+  log.info(`moving to repair target ${target.id} ${target.pos} ${target.hits} of ${target.hitsMax}`);
   if (creep.repair(target) === ERR_NOT_IN_RANGE) {
     moveTo(creep, target.pos);
   }
