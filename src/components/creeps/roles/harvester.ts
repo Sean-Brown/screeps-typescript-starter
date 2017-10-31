@@ -17,8 +17,8 @@ export function run(creep: Creep): void {
       let structures = creep.room.find<Structure>(FIND_MY_STRUCTURES);
       if (structures.length) {
         // Find structure in most need of repair
-        structures = creepActions.sortStructuresMostNeedingRepair(structures);
-        creepActions.moveToDropEnergy(creep, structures[0]);
+        structures = creepActions.sortMostNeedingRepair(structures);
+        creepActions.moveToRepair(creep, structures[0]);
       } else {
         let constructionSites = creep.room.find<ConstructionSite>(FIND_MY_CONSTRUCTION_SITES);
         if (constructionSites.length) {

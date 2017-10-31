@@ -117,11 +117,11 @@ export function sortClosestConstructionSites(creep: Creep, sites: ConstructionSi
 }
 
 /**
- * Sort the structures by structures in the most need of repair
- * @param {Structure[]} structures
- * @returns {Structure[]}
+ * Sort the structures or spawns by the ones in the most need of repair
+ * @param {Array<Structure|Spawn>} structures
+ * @returns {Array<Structure|Spawn>}
  */
-export function sortStructuresMostNeedingRepair(structures: Structure[]): Structure[] {
+export function sortMostNeedingRepair(structures: Array<Structure|Spawn>): Structure[] {
   return structures.sort((sA, sB) => {
     const sAdeficit = sA.hitsMax - sA.hits;
     const sBdeficit = sB.hitsMax - sB.hits;
@@ -165,8 +165,6 @@ export function moveToDropEnergy(creep: Creep, target: Spawn | Structure): void 
 }
 
 export function moveToRepair(creep: Creep, target: Spawn | Structure): void {
-  const repairErr = creep.repair(target);
-  console.info(`repair error: ${repairErr}`);
   if (creep.repair(target) === ERR_NOT_IN_RANGE) {
     moveTo(creep, target.pos);
   }

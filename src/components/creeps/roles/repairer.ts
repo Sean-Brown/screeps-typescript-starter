@@ -20,7 +20,7 @@ export function run(creep: Creep): void {
     let structures = creep.room.find<Structure>(FIND_MY_STRUCTURES);
     if (structures.length) {
       // Find the closest structure
-      structures = creepActions.sortStructuresMostNeedingRepair(structures);
+      structures = creepActions.sortMostNeedingRepair(structures);
       creepActions.moveToRepair(creep, structures[0]);
     } else {
       let constructionSites = creep.room.find<ConstructionSite>(FIND_MY_CONSTRUCTION_SITES);
@@ -28,6 +28,12 @@ export function run(creep: Creep): void {
         // Find the closest construction site
         constructionSites = creepActions.sortClosestConstructionSites(creep, constructionSites);
         creepActions.moveToConstructionSite(creep, constructionSites[0]);
+      } else {
+        let spawns = creep.room.find<Spawn>(FIND_MY_SPAWNS);
+        if (spawns.length) {
+          spawns = creepActions.sortMostNeedingRepair(spawns) as Spawn[];
+          creepActions.moveToRepair(creep, spawns[0]);
+        }
       }
     }
   } else {

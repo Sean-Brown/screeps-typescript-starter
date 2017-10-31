@@ -578,14 +578,14 @@ function sortClosestConstructionSites(creep, sites) {
     });
 }
 exports.sortClosestConstructionSites = sortClosestConstructionSites;
-function sortStructuresMostNeedingRepair(structures) {
+function sortMostNeedingRepair(structures) {
     return structures.sort(function (sA, sB) {
         var sAdeficit = sA.hitsMax - sA.hits;
         var sBdeficit = sB.hitsMax - sB.hits;
         return sAdeficit > sBdeficit ? 1 : sAdeficit < sBdeficit ? -1 : 0;
     });
 }
-exports.sortStructuresMostNeedingRepair = sortStructuresMostNeedingRepair;
+exports.sortMostNeedingRepair = sortMostNeedingRepair;
 function sortClosestEnergySources(creep, energySources) {
     var creepPos = creep.pos;
     return energySources.sort(function (sourceA, sourceB) {
@@ -1764,8 +1764,8 @@ function run(creep) {
         else {
             var structures = creep.room.find(FIND_MY_STRUCTURES);
             if (structures.length) {
-                structures = creepActions.sortStructuresMostNeedingRepair(structures);
-                creepActions.moveToDropEnergy(creep, structures[0]);
+                structures = creepActions.sortMostNeedingRepair(structures);
+                creepActions.moveToRepair(creep, structures[0]);
             }
             else {
                 var constructionSites = creep.room.find(FIND_MY_CONSTRUCTION_SITES);
@@ -1807,7 +1807,7 @@ function run(creep) {
     if (creep.memory.repairing) {
         var structures = creep.room.find(FIND_MY_STRUCTURES);
         if (structures.length) {
-            structures = creepActions.sortStructuresMostNeedingRepair(structures);
+            structures = creepActions.sortMostNeedingRepair(structures);
             creepActions.moveToRepair(creep, structures[0]);
         }
         else {
@@ -1815,6 +1815,13 @@ function run(creep) {
             if (constructionSites.length) {
                 constructionSites = creepActions.sortClosestConstructionSites(creep, constructionSites);
                 creepActions.moveToConstructionSite(creep, constructionSites[0]);
+            }
+            else {
+                var spawns = creep.room.find(FIND_MY_SPAWNS);
+                if (spawns.length) {
+                    spawns = creepActions.sortMostNeedingRepair(spawns);
+                    creepActions.moveToRepair(creep, spawns[0]);
+                }
             }
         }
     }
