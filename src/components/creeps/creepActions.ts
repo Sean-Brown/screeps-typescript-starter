@@ -103,6 +103,14 @@ export function creepBuildCost(bodyParts: string[]): number {
   return bodyParts.reduce((cost, part) => cost + BODYPART_COST[part], 0);
 }
 
+export function harvestClosestSource(creep: Creep) {
+  let sources = creep.room.find<Source>(FIND_SOURCES);
+  if (sources.length) {
+    sources = sortClosestEnergySources(creep, sources);
+    moveToHarvest(creep, sources[0]);
+  }
+}
+
 /**
  * Sort the construction sites by sites closest to the creep
  * @param {Creep} creep

@@ -22,12 +22,14 @@ export function run(creep: Creep): void {
       // Find the closest construction site
       targets = creepActions.sortClosestConstructionSites(creep, targets);
       creepActions.moveToConstructionSite(creep, targets[0]);
+    } else {
+      let structures = creep.room.find<Structure>(FIND_STRUCTURES);
+      if (structures.length) {
+        structures = creepActions.sortMostNeedingEnergy(structures);
+        creepActions.moveToDropEnergy(creep, structures[0]);
+      }
     }
   } else {
-    let sources = creep.room.find<Source>(FIND_SOURCES);
-    if (sources.length) {
-      sources = creepActions.sortClosestEnergySources(creep, sources);
-      creepActions.moveToHarvest(creep, sources[0]);
-    }
+    creepActions.harvestClosestSource(creep);
   }
 }

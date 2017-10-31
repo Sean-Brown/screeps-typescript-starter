@@ -19,18 +19,10 @@ export function run(creep: Creep): void {
         checkStructures(creep);
       }
     } else {
-      collectEnergy(creep);
+      creepActions.harvestClosestSource(creep);
     }
   } else {
-    collectEnergy(creep);
-  }
-}
-
-function collectEnergy(creep: Creep) {
-  let energySources = creep.room.find<Source>(FIND_SOURCES_ACTIVE);
-  if (energySources.length) {
-    energySources = creepActions.sortClosestEnergySources(creep, energySources);
-    creepActions.moveToHarvest(creep, energySources[0]);
+    creepActions.harvestClosestSource(creep);
   }
 }
 

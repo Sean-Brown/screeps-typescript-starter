@@ -761,6 +761,14 @@ function creepBuildCost(bodyParts) {
     return bodyParts.reduce(function (cost, part) { return cost + BODYPART_COST[part]; }, 0);
 }
 exports.creepBuildCost = creepBuildCost;
+function harvestClosestSource(creep) {
+    var sources = creep.room.find(FIND_SOURCES);
+    if (sources.length) {
+        sources = sortClosestEnergySources(creep, sources);
+        moveToHarvest(creep, sources[0]);
+    }
+}
+exports.harvestClosestSource = harvestClosestSource;
 function sortClosestConstructionSites(creep, sites) {
     var creepPos = creep.pos;
     return sites.sort(function (siteA, siteB) {
@@ -1782,13 +1790,16 @@ function run(creep) {
             targets = creepActions.sortClosestConstructionSites(creep, targets);
             creepActions.moveToConstructionSite(creep, targets[0]);
         }
+        else {
+            var structures = creep.room.find(FIND_STRUCTURES);
+            if (structures.length) {
+                structures = creepActions.sortMostNeedingEnergy(structures);
+                creepActions.moveToDropEnergy(creep, structures[0]);
+            }
+        }
     }
     else {
-        var sources = creep.room.find(FIND_SOURCES);
-        if (sources.length) {
-            sources = creepActions.sortClosestEnergySources(creep, sources);
-            creepActions.moveToHarvest(creep, sources[0]);
-        }
+        creepActions.harvestClosestSource(creep);
     }
 }
 exports.run = run;
@@ -1818,21 +1829,14 @@ function run(creep) {
             }
         }
         else {
-            collectEnergy(creep);
+            creepActions.harvestClosestSource(creep);
         }
     }
     else {
-        collectEnergy(creep);
+        creepActions.harvestClosestSource(creep);
     }
 }
 exports.run = run;
-function collectEnergy(creep) {
-    var energySources = creep.room.find(FIND_SOURCES_ACTIVE);
-    if (energySources.length) {
-        energySources = creepActions.sortClosestEnergySources(creep, energySources);
-        creepActions.moveToHarvest(creep, energySources[0]);
-    }
-}
 function checkStructures(creep) {
     var structures = creep.room.find(FIND_MY_STRUCTURES);
     if (structures.length) {
@@ -1888,11 +1892,7 @@ function run(creep) {
         }
     }
     else {
-        var sources = creep.room.find(FIND_SOURCES);
-        if (sources.length) {
-            sources = creepActions.sortClosestEnergySources(creep, sources);
-            creepActions.moveToHarvest(creep, sources[0]);
-        }
+        creepActions.harvestClosestSource(creep);
     }
 }
 exports.run = run;

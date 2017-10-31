@@ -37,10 +37,6 @@ export function run(creep: Creep): void {
       }
     }
   } else {
-    let sources = creep.room.find<Source>(FIND_SOURCES);
-    if (sources.length) {
-      sources = creepActions.sortClosestEnergySources(creep, sources);
-      creepActions.moveToHarvest(creep, sources[0]);
-    }
+    creepActions.harvestClosestSource(creep);
   }
 }
