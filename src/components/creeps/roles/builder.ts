@@ -17,7 +17,7 @@ export function run(creep: Creep): void {
   }
 
   if (creep.memory.building) {
-    const targets = creep.room.find(FIND_CONSTRUCTION_SITES) as ConstructionSite[];
+    const targets = creep.room.find<ConstructionSite>(FIND_CONSTRUCTION_SITES);
     if (targets.length) {
       if (creep.build(targets[0]) === ERR_NOT_IN_RANGE) {
         creep.moveTo(targets[0], { visualizePathStyle: { stroke: "#ffffff" } });
@@ -26,7 +26,7 @@ export function run(creep: Creep): void {
       console.info("No construction sites available");
     }
   } else {
-    const sources = creep.room.find(FIND_SOURCES) as Source[];
+    const sources = creep.room.find<Source>(FIND_SOURCES);
     if (creep.harvest(sources[0]) === ERR_NOT_IN_RANGE) {
       creep.moveTo(sources[0], { visualizePathStyle: { stroke: "#ffaa00" } });
     } else if (Config.ENABLE_DEBUG_MODE) {
