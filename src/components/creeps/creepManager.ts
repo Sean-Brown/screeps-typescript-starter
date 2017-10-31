@@ -68,7 +68,7 @@ function _buildMissingCreeps(room: Room, creeps: Creep[]) {
     });
   }
   if (builders.length < 1 && harvesters.length > 1) {
-    bodyParts = [WORK, WORK, MOVE];
+    bodyParts = [WORK, CARRY, MOVE];
     _.each(spawns, (spawn: Spawn) => {
       _spawnCreep(spawn, bodyParts, Roles.Builder);
     });
