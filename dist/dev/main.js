@@ -1610,6 +1610,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var CreepRoles = (function () {
     function CreepRoles() {
     }
+    Object.defineProperty(CreepRoles.prototype, "Builder", {
+        get: function () { return "builder"; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(CreepRoles.prototype, "Harvester", {
+        get: function () { return "harvester"; },
+        enumerable: true,
+        configurable: true
+    });
     CreepRoles.prototype.IsBuilder = function (creep) {
         return creep.memory.role === this.Builder;
     };

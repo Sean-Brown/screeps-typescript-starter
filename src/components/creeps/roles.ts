@@ -1,6 +1,6 @@
 class CreepRoles {
-  public readonly Builder: "builder";
-  public readonly Harvester: "harvester";
+  public get Builder() { return "builder"; }
+  public get Harvester() { return "harvester"; }
 
   public IsBuilder(creep: Creep): boolean {
     return creep.memory.role === this.Builder;
