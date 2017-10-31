@@ -497,30 +497,8 @@ exports.compareByGeneratedPositionsInflated = compareByGeneratedPositionsInflate
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var logLevels_1 = __webpack_require__(4);
-exports.ENABLE_DEBUG_MODE = true;
-exports.USE_PROFILER = true;
-exports.DEFAULT_MIN_LIFE_BEFORE_NEEDS_REFILL = 700;
-exports.LOG_LEVEL = logLevels_1.LogLevels.DEBUG;
-exports.LOG_PRINT_TICK = true;
-exports.LOG_PRINT_LINES = true;
-exports.LOG_LOAD_SOURCE_MAP = true;
-exports.LOG_MAX_PAD = 100;
-exports.LOG_VSC = { repo: "@@_repo_@@", revision: "", valid: false };
-exports.LOG_VSC_URL_TEMPLATE = function (path, line) {
-    return exports.LOG_VSC.repo + "/blob/" + exports.LOG_VSC.revision + "/" + path + "#" + line;
-};
-
-
-/***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
 var source_map_1 = __webpack_require__(21);
-var Config = __webpack_require__(1);
+var Config = __webpack_require__(2);
 var logLevels_1 = __webpack_require__(4);
 var stackLineRe = /([^ ]*) \(([^:]*):([0-9]*):([0-9]*)\)/;
 function resolve(fileLine) {
@@ -704,13 +682,36 @@ global.log = exports.log;
 
 
 /***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var logLevels_1 = __webpack_require__(4);
+exports.ENABLE_DEBUG_MODE = true;
+exports.USE_PROFILER = true;
+exports.DEFAULT_MIN_LIFE_BEFORE_NEEDS_REFILL = 700;
+exports.LOG_LEVEL = logLevels_1.LogLevels.DEBUG;
+exports.LOG_PRINT_TICK = true;
+exports.LOG_PRINT_LINES = true;
+exports.LOG_LOAD_SOURCE_MAP = true;
+exports.LOG_MAX_PAD = 100;
+exports.LOG_VSC = { repo: "@@_repo_@@", revision: "", valid: false };
+exports.LOG_VSC_URL_TEMPLATE = function (path, line) {
+    return exports.LOG_VSC.repo + "/blob/" + exports.LOG_VSC.revision + "/" + path + "#" + line;
+};
+
+
+/***/ }),
 /* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Config = __webpack_require__(1);
+var Config = __webpack_require__(2);
+var log_1 = __webpack_require__(1);
 function moveTo(creep, target) {
     return creep.moveTo(target);
 }
@@ -807,8 +808,14 @@ function moveToDropEnergy(creep, target) {
 }
 exports.moveToDropEnergy = moveToDropEnergy;
 function moveToRepair(creep, target) {
-    if (creep.repair(target) === ERR_NOT_IN_RANGE) {
+    log_1.log.info("moving to repair");
+    var creepErr = creep.repair(target);
+    if (creepErr === ERR_NOT_IN_RANGE) {
+        log_1.log.info("not in range");
         moveTo(creep, target.pos);
+    }
+    else {
+        log_1.log.info("repair got creep error " + creepErr);
     }
 }
 exports.moveToRepair = moveToRepair;
@@ -1539,9 +1546,9 @@ exports.SourceMapGenerator = SourceMapGenerator;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var CreepManager = __webpack_require__(9);
-var Config = __webpack_require__(1);
+var Config = __webpack_require__(2);
 var Profiler = __webpack_require__(14);
-var log_1 = __webpack_require__(2);
+var log_1 = __webpack_require__(1);
 if (Config.USE_PROFILER) {
     Profiler.enable();
 }
@@ -1577,12 +1584,12 @@ exports.loop = !Config.USE_PROFILER ? mloop : function () { Profiler.wrap(mloop)
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Config = __webpack_require__(1);
+var Config = __webpack_require__(2);
 var builder = __webpack_require__(11);
 var harvester = __webpack_require__(12);
 var repairer = __webpack_require__(13);
 var roles_1 = __webpack_require__(10);
-var log_1 = __webpack_require__(2);
+var log_1 = __webpack_require__(1);
 function run(room) {
     var creeps = room.find(FIND_MY_CREEPS);
     var creepCount = _.size(creeps);
@@ -1795,7 +1802,7 @@ exports.run = run;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var creepActions = __webpack_require__(3);
-var log_1 = __webpack_require__(2);
+var log_1 = __webpack_require__(1);
 function run(creep) {
     if (creep.memory.repairing && creep.carry.energy === 0) {
         creep.memory.repairing = false;
