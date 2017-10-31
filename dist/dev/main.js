@@ -808,14 +808,9 @@ function moveToDropEnergy(creep, target) {
 }
 exports.moveToDropEnergy = moveToDropEnergy;
 function moveToRepair(creep, target) {
-    log_1.log.info("moving to repair");
-    var creepErr = creep.repair(target);
-    if (creepErr === ERR_NOT_IN_RANGE) {
-        log_1.log.info("not in range");
+    log_1.log.info("moving to repair target " + target.id + " " + target.pos);
+    if (creep.repair(target) === ERR_NOT_IN_RANGE) {
         moveTo(creep, target.pos);
-    }
-    else {
-        log_1.log.info("repair got creep error " + creepErr);
     }
 }
 exports.moveToRepair = moveToRepair;

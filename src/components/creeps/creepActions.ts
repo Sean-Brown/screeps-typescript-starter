@@ -167,13 +167,9 @@ export function moveToDropEnergy(creep: Creep, target: Spawn | Structure): void 
 }
 
 export function moveToRepair(creep: Creep, target: Spawn | Structure): void {
-  log.info("moving to repair");
-  const creepErr = creep.repair(target);
-  if (creepErr === ERR_NOT_IN_RANGE) {
-    log.info("not in range");
+  log.info(`moving to repair target ${target.id} ${target.pos}`);
+  if (creep.repair(target) === ERR_NOT_IN_RANGE) {
     moveTo(creep, target.pos);
-  } else {
-    log.info("repair got creep error " + creepErr);
   }
 }
 
