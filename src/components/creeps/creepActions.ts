@@ -100,3 +100,46 @@ export function canWork(creep: Creep): boolean {
 export function creepBuildCost(bodyParts: string[]): number {
   return bodyParts.reduce((cost, part) => cost + BODYPART_COST[part], 0);
 }
+
+/**
+ * Sort the construction sites by sites closest to the creep
+ * @param {Creep} creep
+ * @param {ConstructionSite[]} sites
+ * @returns {ConstructionSite[]}
+ */
+export function sortClosestConstructionSites(creep: Creep, sites: ConstructionSite[]): ConstructionSite[] {
+  const creepPos = creep.pos;
+  return sites.sort((siteA, siteB) => {
+    const lenA = creep.room.findPath(creepPos, siteA.pos).length;
+    const lenB = creep.room.findPath(creepPos, siteB.pos).length;
+    return lenA > lenB ? 1 : lenA < lenB ? -1 : 0;
+  });
+}
+
+/**
+ * Sort the structures by structures in the most need of repair
+ * @param {Structure[]} structures
+ * @returns {Structure[]}
+ */
+export function sortStructuresMostNeedingRepair(structures: Structure[]): Structure[] {
+  return structures.sort((sA, sB) => {
+    const sAdeficit = sA.hitsMax - sA.hits;
+    const sBdeficit = sB.hitsMax - sB.hits;
+    return sAdeficit > sBdeficit ? 1 : sAdeficit < sBdeficit ? -1 : 0;
+  });
+}
+
+/**
+ * Sort the energy sources by distance from the creep
+ * @param {Creep} creep
+ * @param {Source[]} energySources
+ * @returns {Source[]}
+ */
+export function sortClosestEnergySources(creep: Creep, energySources: Source[]): Source[] {
+  const creepPos = creep.pos;
+  return energySources.sort((sourceA, sourceB) => {
+    const lenA = creep.room.findPath(creepPos, sourceA.pos).length;
+    const lenB = creep.room.findPath(creepPos, sourceB.pos).length;
+    return lenA > lenB ? 1 : lenA < lenB ? -1 : 0;
+  });
+}

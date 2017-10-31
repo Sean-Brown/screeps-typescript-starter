@@ -14,25 +14,24 @@ export function run(creep: Creep): void {
     if (spawn.energy < spawn.energyCapacity) {
       _moveToDropEnergy(creep, spawn);
     } else {
-      const structures = creep.room.find<Structure>(FIND_MY_STRUCTURES);
+      let structures = creep.room.find<Structure>(FIND_MY_STRUCTURES);
       if (structures.length) {
+        // Find structure in most need of repair
+        structures = creepActions.sortStructuresMostNeedingRepair(structures);
         _moveToDropEnergy(creep, structures[0]);
       } else {
         let constructionSites = creep.room.find<ConstructionSite>(FIND_MY_CONSTRUCTION_SITES);
         if (constructionSites.length) {
           // Find the closest construction site
-          constructionSites = constructionSites.sort((siteA, siteB) => {
-            const lenA = creep.room.findPath(creep.pos, siteA.pos).length;
-            const lenB = creep.room.findPath(creep.pos, siteB.pos).length;
-            return lenA > lenB ? 1 : lenA < lenB ? -1 : 0;
-          });
+          constructionSites = creepActions.sortClosestConstructionSites(creep, constructionSites);
           _moveToConstructionSite(creep, constructionSites[0]);
         }
       }
     }
   } else {
-    const energySources = creep.room.find<Source>(FIND_SOURCES_ACTIVE);
+    let energySources = creep.room.find<Source>(FIND_SOURCES_ACTIVE);
     if (energySources.length) {
+      energySources = creepActions.sortClosestEnergySources(creep, energySources);
       _moveToHarvest(creep, energySources[0]);
     }
   }

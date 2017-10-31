@@ -723,6 +723,91 @@ var LogLevels;
 /* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Config = __webpack_require__(0);
+function moveTo(creep, target) {
+    return creep.moveTo(target);
+}
+exports.moveTo = moveTo;
+function needsRenew(creep) {
+    return (creep.ticksToLive < Config.DEFAULT_MIN_LIFE_BEFORE_NEEDS_REFILL);
+}
+exports.needsRenew = needsRenew;
+function tryRenew(creep, spawn) {
+    return spawn.renewCreep(creep);
+}
+exports.tryRenew = tryRenew;
+function moveToRenew(creep, spawn) {
+    if (tryRenew(creep, spawn) === ERR_NOT_IN_RANGE) {
+        creep.moveTo(spawn);
+    }
+}
+exports.moveToRenew = moveToRenew;
+function getEnergy(creep, roomObject) {
+    var energy = roomObject;
+    if (energy) {
+        if (creep.pos.isNearTo(energy)) {
+            creep.pickup(energy);
+        }
+        else {
+            moveTo(creep, energy.pos);
+        }
+    }
+}
+exports.getEnergy = getEnergy;
+function canWork(creep) {
+    var working = creep.memory.working;
+    if (working && _.sum(creep.carry) === 0) {
+        creep.memory.working = false;
+        return false;
+    }
+    else if (!working && _.sum(creep.carry) === creep.carryCapacity) {
+        creep.memory.working = true;
+        return true;
+    }
+    else {
+        return creep.memory.working;
+    }
+}
+exports.canWork = canWork;
+function creepBuildCost(bodyParts) {
+    return bodyParts.reduce(function (cost, part) { return cost + BODYPART_COST[part]; }, 0);
+}
+exports.creepBuildCost = creepBuildCost;
+function sortClosestConstructionSites(creep, sites) {
+    var creepPos = creep.pos;
+    return sites.sort(function (siteA, siteB) {
+        var lenA = creep.room.findPath(creepPos, siteA.pos).length;
+        var lenB = creep.room.findPath(creepPos, siteB.pos).length;
+        return lenA > lenB ? 1 : lenA < lenB ? -1 : 0;
+    });
+}
+exports.sortClosestConstructionSites = sortClosestConstructionSites;
+function sortStructuresMostNeedingRepair(structures) {
+    return structures.sort(function (sA, sB) {
+        var sAdeficit = sA.hitsMax - sA.hits;
+        var sBdeficit = sB.hitsMax - sB.hits;
+        return sAdeficit > sBdeficit ? 1 : sAdeficit < sBdeficit ? -1 : 0;
+    });
+}
+exports.sortStructuresMostNeedingRepair = sortStructuresMostNeedingRepair;
+function sortClosestEnergySources(creep, energySources) {
+    var creepPos = creep.pos;
+    return energySources.sort(function (sourceA, sourceB) {
+        var lenA = creep.room.findPath(creepPos, sourceA.pos).length;
+        var lenB = creep.room.findPath(creepPos, sourceB.pos).length;
+        return lenA > lenB ? 1 : lenA < lenB ? -1 : 0;
+    });
+}
+exports.sortClosestEnergySources = sortClosestEnergySources;
+
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -847,7 +932,7 @@ exports.ArraySet = ArraySet;
 
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -993,7 +1078,7 @@ exports.decode = function base64VLQ_decode(aStr, aIndex, aOutParam) {
 
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -1003,9 +1088,9 @@ exports.decode = function base64VLQ_decode(aStr, aIndex, aOutParam) {
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-var base64VLQ = __webpack_require__(5);
+var base64VLQ = __webpack_require__(6);
 var util = __webpack_require__(1);
-var ArraySet = __webpack_require__(4).ArraySet;
+var ArraySet = __webpack_require__(5).ArraySet;
 var MappingList = __webpack_require__(16).MappingList;
 
 /**
@@ -1415,7 +1500,7 @@ exports.SourceMapGenerator = SourceMapGenerator;
 
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1451,65 +1536,6 @@ function mloop() {
     }
 }
 exports.loop = !Config.USE_PROFILER ? mloop : function () { Profiler.wrap(mloop); };
-
-
-/***/ }),
-/* 8 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var Config = __webpack_require__(0);
-function moveTo(creep, target) {
-    return creep.moveTo(target);
-}
-exports.moveTo = moveTo;
-function needsRenew(creep) {
-    return (creep.ticksToLive < Config.DEFAULT_MIN_LIFE_BEFORE_NEEDS_REFILL);
-}
-exports.needsRenew = needsRenew;
-function tryRenew(creep, spawn) {
-    return spawn.renewCreep(creep);
-}
-exports.tryRenew = tryRenew;
-function moveToRenew(creep, spawn) {
-    if (tryRenew(creep, spawn) === ERR_NOT_IN_RANGE) {
-        creep.moveTo(spawn);
-    }
-}
-exports.moveToRenew = moveToRenew;
-function getEnergy(creep, roomObject) {
-    var energy = roomObject;
-    if (energy) {
-        if (creep.pos.isNearTo(energy)) {
-            creep.pickup(energy);
-        }
-        else {
-            moveTo(creep, energy.pos);
-        }
-    }
-}
-exports.getEnergy = getEnergy;
-function canWork(creep) {
-    var working = creep.memory.working;
-    if (working && _.sum(creep.carry) === 0) {
-        creep.memory.working = false;
-        return false;
-    }
-    else if (!working && _.sum(creep.carry) === creep.carryCapacity) {
-        creep.memory.working = true;
-        return true;
-    }
-    else {
-        return creep.memory.working;
-    }
-}
-exports.canWork = canWork;
-function creepBuildCost(bodyParts) {
-    return bodyParts.reduce(function (cost, part) { return cost + BODYPART_COST[part]; }, 0);
-}
-exports.creepBuildCost = creepBuildCost;
 
 
 /***/ }),
@@ -1639,6 +1665,7 @@ exports.Roles = new CreepRoles();
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var Config = __webpack_require__(0);
+var creepActions = __webpack_require__(4);
 function run(creep) {
     if (creep.memory.building && creep.carry.energy === 0) {
         creep.memory.building = false;
@@ -1651,11 +1678,7 @@ function run(creep) {
     if (creep.memory.building) {
         var targets = creep.room.find(FIND_CONSTRUCTION_SITES);
         if (targets.length) {
-            targets = targets.sort(function (siteA, siteB) {
-                var lenA = creep.room.findPath(creep.pos, siteA.pos).length;
-                var lenB = creep.room.findPath(creep.pos, siteB.pos).length;
-                return lenA > lenB ? 1 : lenA < lenB ? -1 : 0;
-            });
+            targets = creepActions.sortClosestConstructionSites(creep, targets);
             if (creep.build(targets[0]) === ERR_NOT_IN_RANGE) {
                 creep.moveTo(targets[0], { visualizePathStyle: { stroke: "#ffffff" } });
             }
@@ -1667,6 +1690,7 @@ function run(creep) {
     else {
         var sources = creep.room.find(FIND_SOURCES);
         if (sources.length) {
+            sources = creepActions.sortClosestEnergySources(creep, sources);
             if (creep.harvest(sources[0]) === ERR_NOT_IN_RANGE) {
                 creep.moveTo(sources[0], { visualizePathStyle: { stroke: "#ffaa00" } });
             }
@@ -1686,7 +1710,7 @@ exports.run = run;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var creepActions = __webpack_require__(8);
+var creepActions = __webpack_require__(4);
 function run(creep) {
     var spawn = creep.room.find(FIND_MY_SPAWNS)[0];
     if (creepActions.needsRenew(creep)) {
@@ -1699,16 +1723,13 @@ function run(creep) {
         else {
             var structures = creep.room.find(FIND_MY_STRUCTURES);
             if (structures.length) {
+                structures = creepActions.sortStructuresMostNeedingRepair(structures);
                 _moveToDropEnergy(creep, structures[0]);
             }
             else {
                 var constructionSites = creep.room.find(FIND_MY_CONSTRUCTION_SITES);
                 if (constructionSites.length) {
-                    constructionSites = constructionSites.sort(function (siteA, siteB) {
-                        var lenA = creep.room.findPath(creep.pos, siteA.pos).length;
-                        var lenB = creep.room.findPath(creep.pos, siteB.pos).length;
-                        return lenA > lenB ? 1 : lenA < lenB ? -1 : 0;
-                    });
+                    constructionSites = creepActions.sortClosestConstructionSites(creep, constructionSites);
                     _moveToConstructionSite(creep, constructionSites[0]);
                 }
             }
@@ -1717,6 +1738,7 @@ function run(creep) {
     else {
         var energySources = creep.room.find(FIND_SOURCES_ACTIVE);
         if (energySources.length) {
+            energySources = creepActions.sortClosestEnergySources(creep, energySources);
             _moveToHarvest(creep, energySources[0]);
         }
     }
@@ -2483,8 +2505,8 @@ exports.quickSort = function (ary, comparator) {
 
 var util = __webpack_require__(1);
 var binarySearch = __webpack_require__(15);
-var ArraySet = __webpack_require__(4).ArraySet;
-var base64VLQ = __webpack_require__(5);
+var ArraySet = __webpack_require__(5).ArraySet;
+var base64VLQ = __webpack_require__(6);
 var quickSort = __webpack_require__(17).quickSort;
 
 function SourceMapConsumer(aSourceMap) {
@@ -3569,7 +3591,7 @@ exports.IndexedSourceMapConsumer = IndexedSourceMapConsumer;
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-var SourceMapGenerator = __webpack_require__(6).SourceMapGenerator;
+var SourceMapGenerator = __webpack_require__(7).SourceMapGenerator;
 var util = __webpack_require__(1);
 
 // Matches a Windows-style `\r\n` newline or a `\n` newline used by all other
@@ -3986,7 +4008,7 @@ exports.SourceNode = SourceNode;
  * Licensed under the New BSD license. See LICENSE.txt or:
  * http://opensource.org/licenses/BSD-3-Clause
  */
-exports.SourceMapGenerator = __webpack_require__(6).SourceMapGenerator;
+exports.SourceMapGenerator = __webpack_require__(7).SourceMapGenerator;
 exports.SourceMapConsumer = __webpack_require__(18).SourceMapConsumer;
 exports.SourceNode = __webpack_require__(19).SourceNode;
 
@@ -4001,7 +4023,7 @@ module.exports = require("main.js.map");
 /* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(7);
+module.exports = __webpack_require__(8);
 
 
 /***/ })
