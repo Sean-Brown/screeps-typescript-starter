@@ -1688,7 +1688,7 @@ var creepActions = __webpack_require__(2);
 function run(creep) {
     if (creep.memory.building && creep.carry.energy === 0) {
         creep.memory.building = false;
-        creep.say("Harvest");
+        creep.say("Harvesting");
     }
     if (!creep.memory.building && creep.carry.energy === creep.carryCapacity) {
         creep.memory.building = true;
@@ -1803,6 +1803,15 @@ function run(creep) {
             structures = creepActions.sortStructuresMostNeedingRepair(structures);
             if (creep.repair(structures[0]) === ERR_NOT_IN_RANGE) {
                 creep.moveTo(structures[0], { visualizePathStyle: { stroke: "#ffffff" } });
+            }
+        }
+        else {
+            var constructionSites = creep.room.find(FIND_MY_CONSTRUCTION_SITES);
+            if (constructionSites.length) {
+                constructionSites = creepActions.sortClosestConstructionSites(creep, constructionSites);
+                if (creep.build(constructionSites[0]) === ERR_NOT_IN_RANGE) {
+                    creep.moveTo(constructionSites[0], { visualizePathStyle: { stroke: "#ffffff" } });
+                }
             }
         }
     }

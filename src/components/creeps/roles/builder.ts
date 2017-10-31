@@ -9,7 +9,7 @@ import * as creepActions from "../creepActions";
 export function run(creep: Creep): void {
   if (creep.memory.building && creep.carry.energy === 0) {
     creep.memory.building = false;
-    creep.say("Harvest");
+    creep.say("Harvesting");
   }
   if (!creep.memory.building && creep.carry.energy === creep.carryCapacity) {
     creep.memory.building = true;
