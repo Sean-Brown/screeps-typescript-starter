@@ -143,3 +143,35 @@ export function sortClosestEnergySources(creep: Creep, energySources: Source[]):
     return lenA > lenB ? 1 : lenA < lenB ? -1 : 0;
   });
 }
+
+export function tryHarvest(creep: Creep, target: Source): number {
+  return creep.harvest(target);
+}
+
+export function moveToHarvest(creep: Creep, target: Source): void {
+  if (tryHarvest(creep, target) === ERR_NOT_IN_RANGE) {
+    moveTo(creep, target.pos);
+  }
+}
+
+export function tryEnergyDropOff(creep: Creep, target: Spawn | Structure): number {
+  return creep.transfer(target, RESOURCE_ENERGY);
+}
+
+export function moveToDropEnergy(creep: Creep, target: Spawn | Structure): void {
+  if (tryEnergyDropOff(creep, target) === ERR_NOT_IN_RANGE) {
+    moveTo(creep, target.pos);
+  }
+}
+
+export function moveToRepair(creep: Creep, target: Spawn | Structure): void {
+  if (creep.repair(target) === ERR_NOT_IN_RANGE) {
+    moveTo(creep, target.pos);
+  }
+}
+
+export function moveToConstructionSite(creep: Creep, target: ConstructionSite): void {
+  if (creep.build(target) === ERR_NOT_IN_RANGE) {
+    moveTo(creep, target.pos);
+  }
+}

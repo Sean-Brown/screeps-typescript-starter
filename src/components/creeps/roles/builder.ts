@@ -21,17 +21,13 @@ export function run(creep: Creep): void {
     if (targets.length) {
       // Find the closest construction site
       targets = creepActions.sortClosestConstructionSites(creep, targets);
-      if (creep.build(targets[0]) === ERR_NOT_IN_RANGE) {
-        creep.moveTo(targets[0], { visualizePathStyle: { stroke: "#ffffff" } });
-      }
+      creepActions.moveToConstructionSite(creep, targets[0]);
     }
   } else {
     let sources = creep.room.find<Source>(FIND_SOURCES);
     if (sources.length) {
       sources = creepActions.sortClosestEnergySources(creep, sources);
-      if (creep.harvest(sources[0]) === ERR_NOT_IN_RANGE) {
-        creep.moveTo(sources[0], { visualizePathStyle: { stroke: "#ffaa00" } });
-      }
+      creepActions.moveToHarvest(creep, sources[0]);
     }
   }
 }

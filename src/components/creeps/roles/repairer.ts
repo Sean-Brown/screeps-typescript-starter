@@ -21,26 +21,20 @@ export function run(creep: Creep): void {
     if (structures.length) {
       // Find the closest structure
       structures = creepActions.sortStructuresMostNeedingRepair(structures);
-      if (creep.repair(structures[0]) === ERR_NOT_IN_RANGE) {
-        creep.moveTo(structures[0], { visualizePathStyle: { stroke: "#ffffff" } });
-      }
+      creepActions.moveToRepair(creep, structures[0]);
     } else {
       let constructionSites = creep.room.find<ConstructionSite>(FIND_MY_CONSTRUCTION_SITES);
       if (constructionSites.length) {
         // Find the closest construction site
         constructionSites = creepActions.sortClosestConstructionSites(creep, constructionSites);
-        if (creep.build(constructionSites[0]) === ERR_NOT_IN_RANGE) {
-          creep.moveTo(constructionSites[0], { visualizePathStyle: { stroke: "#ffffff" } });
-        }
+        creepActions.moveToConstructionSite(creep, constructionSites[0]);
       }
     }
   } else {
     let sources = creep.room.find<Source>(FIND_SOURCES);
     if (sources.length) {
       sources = creepActions.sortClosestEnergySources(creep, sources);
-      if (creep.harvest(sources[0]) === ERR_NOT_IN_RANGE) {
-        creep.moveTo(sources[0], { visualizePathStyle: { stroke: "#ffaa00" } });
-      }
+      creepActions.moveToHarvest(creep, sources[0]);
     }
   }
 }

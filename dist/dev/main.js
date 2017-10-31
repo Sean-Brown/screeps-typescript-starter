@@ -595,6 +595,38 @@ function sortClosestEnergySources(creep, energySources) {
     });
 }
 exports.sortClosestEnergySources = sortClosestEnergySources;
+function tryHarvest(creep, target) {
+    return creep.harvest(target);
+}
+exports.tryHarvest = tryHarvest;
+function moveToHarvest(creep, target) {
+    if (tryHarvest(creep, target) === ERR_NOT_IN_RANGE) {
+        moveTo(creep, target.pos);
+    }
+}
+exports.moveToHarvest = moveToHarvest;
+function tryEnergyDropOff(creep, target) {
+    return creep.transfer(target, RESOURCE_ENERGY);
+}
+exports.tryEnergyDropOff = tryEnergyDropOff;
+function moveToDropEnergy(creep, target) {
+    if (tryEnergyDropOff(creep, target) === ERR_NOT_IN_RANGE) {
+        moveTo(creep, target.pos);
+    }
+}
+exports.moveToDropEnergy = moveToDropEnergy;
+function moveToRepair(creep, target) {
+    if (creep.repair(target) === ERR_NOT_IN_RANGE) {
+        moveTo(creep, target.pos);
+    }
+}
+exports.moveToRepair = moveToRepair;
+function moveToConstructionSite(creep, target) {
+    if (creep.build(target) === ERR_NOT_IN_RANGE) {
+        moveTo(creep, target.pos);
+    }
+}
+exports.moveToConstructionSite = moveToConstructionSite;
 
 
 /***/ }),
@@ -1698,18 +1730,14 @@ function run(creep) {
         var targets = creep.room.find(FIND_CONSTRUCTION_SITES);
         if (targets.length) {
             targets = creepActions.sortClosestConstructionSites(creep, targets);
-            if (creep.build(targets[0]) === ERR_NOT_IN_RANGE) {
-                creep.moveTo(targets[0], { visualizePathStyle: { stroke: "#ffffff" } });
-            }
+            creepActions.moveToConstructionSite(creep, targets[0]);
         }
     }
     else {
         var sources = creep.room.find(FIND_SOURCES);
         if (sources.length) {
             sources = creepActions.sortClosestEnergySources(creep, sources);
-            if (creep.harvest(sources[0]) === ERR_NOT_IN_RANGE) {
-                creep.moveTo(sources[0], { visualizePathStyle: { stroke: "#ffaa00" } });
-            }
+            creepActions.moveToHarvest(creep, sources[0]);
         }
     }
 }
@@ -1731,19 +1759,19 @@ function run(creep) {
     }
     else if (_.sum(creep.carry) === creep.carryCapacity) {
         if (spawn.energy < spawn.energyCapacity) {
-            _moveToDropEnergy(creep, spawn);
+            creepActions.moveToDropEnergy(creep, spawn);
         }
         else {
             var structures = creep.room.find(FIND_MY_STRUCTURES);
             if (structures.length) {
                 structures = creepActions.sortStructuresMostNeedingRepair(structures);
-                _moveToDropEnergy(creep, structures[0]);
+                creepActions.moveToDropEnergy(creep, structures[0]);
             }
             else {
                 var constructionSites = creep.room.find(FIND_MY_CONSTRUCTION_SITES);
                 if (constructionSites.length) {
                     constructionSites = creepActions.sortClosestConstructionSites(creep, constructionSites);
-                    _moveToConstructionSite(creep, constructionSites[0]);
+                    creepActions.moveToConstructionSite(creep, constructionSites[0]);
                 }
             }
         }
@@ -1752,32 +1780,11 @@ function run(creep) {
         var energySources = creep.room.find(FIND_SOURCES_ACTIVE);
         if (energySources.length) {
             energySources = creepActions.sortClosestEnergySources(creep, energySources);
-            _moveToHarvest(creep, energySources[0]);
+            creepActions.moveToHarvest(creep, energySources[0]);
         }
     }
 }
 exports.run = run;
-function _tryHarvest(creep, target) {
-    return creep.harvest(target);
-}
-function _moveToHarvest(creep, target) {
-    if (_tryHarvest(creep, target) === ERR_NOT_IN_RANGE) {
-        creepActions.moveTo(creep, target.pos);
-    }
-}
-function _tryEnergyDropOff(creep, target) {
-    return creep.transfer(target, RESOURCE_ENERGY);
-}
-function _moveToDropEnergy(creep, target) {
-    if (_tryEnergyDropOff(creep, target) === ERR_NOT_IN_RANGE) {
-        creepActions.moveTo(creep, target.pos);
-    }
-}
-function _moveToConstructionSite(creep, target) {
-    if (creep.build(target) === ERR_NOT_IN_RANGE) {
-        creep.moveTo(target, { visualizePathStyle: { stroke: "#ffffff" } });
-    }
-}
 
 
 /***/ }),
@@ -1801,17 +1808,13 @@ function run(creep) {
         var structures = creep.room.find(FIND_MY_STRUCTURES);
         if (structures.length) {
             structures = creepActions.sortStructuresMostNeedingRepair(structures);
-            if (creep.repair(structures[0]) === ERR_NOT_IN_RANGE) {
-                creep.moveTo(structures[0], { visualizePathStyle: { stroke: "#ffffff" } });
-            }
+            creepActions.moveToRepair(creep, structures[0]);
         }
         else {
             var constructionSites = creep.room.find(FIND_MY_CONSTRUCTION_SITES);
             if (constructionSites.length) {
                 constructionSites = creepActions.sortClosestConstructionSites(creep, constructionSites);
-                if (creep.build(constructionSites[0]) === ERR_NOT_IN_RANGE) {
-                    creep.moveTo(constructionSites[0], { visualizePathStyle: { stroke: "#ffffff" } });
-                }
+                creepActions.moveToConstructionSite(creep, constructionSites[0]);
             }
         }
     }
@@ -1819,9 +1822,7 @@ function run(creep) {
         var sources = creep.room.find(FIND_SOURCES);
         if (sources.length) {
             sources = creepActions.sortClosestEnergySources(creep, sources);
-            if (creep.harvest(sources[0]) === ERR_NOT_IN_RANGE) {
-                creep.moveTo(sources[0], { visualizePathStyle: { stroke: "#ffaa00" } });
-            }
+            creepActions.moveToHarvest(creep, sources[0]);
         }
     }
 }
