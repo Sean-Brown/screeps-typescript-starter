@@ -64,7 +64,7 @@ module.exports =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 20);
+/******/ 	return __webpack_require__(__webpack_require__.s = 21);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -519,7 +519,7 @@ exports.LOG_VSC_URL_TEMPLATE = function (path, line) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var source_map_1 = __webpack_require__(18);
+var source_map_1 = __webpack_require__(19);
 var Config = __webpack_require__(1);
 var logLevels_1 = __webpack_require__(3);
 var stackLineRe = /([^ ]*) \(([^:]*):([0-9]*):([0-9]*)\)/;
@@ -574,7 +574,7 @@ var Log = (function () {
     }
     Log.loadSourceMap = function () {
         try {
-            var map = __webpack_require__(19);
+            var map = __webpack_require__(20);
             if (map) {
                 Log.sourceMap = new source_map_1.SourceMapConsumer(map);
             }
@@ -887,7 +887,7 @@ exports.ArraySet = ArraySet;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-var base64 = __webpack_require__(12);
+var base64 = __webpack_require__(13);
 
 // A single base 64 digit can contain 6 bits of data. For the base 64 variable
 // length quantities we use in the source map spec, the first bit is the sign,
@@ -1006,7 +1006,7 @@ exports.decode = function base64VLQ_decode(aStr, aIndex, aOutParam) {
 var base64VLQ = __webpack_require__(5);
 var util = __webpack_require__(0);
 var ArraySet = __webpack_require__(4).ArraySet;
-var MappingList = __webpack_require__(14).MappingList;
+var MappingList = __webpack_require__(15).MappingList;
 
 /**
  * An instance of the SourceMapGenerator represents a source map which is
@@ -1423,7 +1423,7 @@ exports.SourceMapGenerator = SourceMapGenerator;
 Object.defineProperty(exports, "__esModule", { value: true });
 var CreepManager = __webpack_require__(9);
 var Config = __webpack_require__(1);
-var Profiler = __webpack_require__(11);
+var Profiler = __webpack_require__(12);
 var log_1 = __webpack_require__(2);
 if (Config.USE_PROFILER) {
     Profiler.enable();
@@ -1516,7 +1516,8 @@ exports.canWork = canWork;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var Config = __webpack_require__(1);
-var harvester = __webpack_require__(10);
+var builder = __webpack_require__(10);
+var harvester = __webpack_require__(11);
 var log_1 = __webpack_require__(2);
 function run(room) {
     var creeps = room.find(FIND_MY_CREEPS);
@@ -1528,6 +1529,9 @@ function run(room) {
     _.each(creeps, function (creep) {
         if (creep.memory.role === "harvester") {
             harvester.run(creep);
+        }
+        else if (creep.memory.role === "builder") {
+            builder.run(creep);
         }
     });
 }
@@ -1557,8 +1561,8 @@ function _buildMissingCreeps(room, creeps) {
             _spawnCreep(spawn, bodyParts, "harvester");
         });
     }
-    if (builders.length < 1 && room.energyAvailable > 800) {
-        bodyParts = [WORK, WORK, WORK, MOVE, MOVE];
+    if (builders.length < 1) {
+        bodyParts = [WORK, WORK, MOVE];
         _.each(spawns, function (spawn) {
             _spawnCreep(spawn, bodyParts, "builder");
         });
@@ -1598,6 +1602,24 @@ function _spawnCreep(spawn, bodyParts, role) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+function run(creep) {
+    var target = creep.pos.findClosestByRange(FIND_CONSTRUCTION_SITES);
+    if (target) {
+        if (creep.build(target) === ERR_NOT_IN_RANGE) {
+            creep.moveTo(target);
+        }
+    }
+}
+exports.run = run;
+
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
 var creepActions = __webpack_require__(8);
 function run(creep) {
     var spawn = creep.room.find(FIND_MY_SPAWNS)[0];
@@ -1632,7 +1654,7 @@ function _moveToDropEnergy(creep, target) {
 
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports) {
 
 let usedOnStart = 0;
@@ -1962,7 +1984,7 @@ module.exports = {
 
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -2035,7 +2057,7 @@ exports.decode = function (charCode) {
 
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -2152,7 +2174,7 @@ exports.search = function search(aNeedle, aHaystack, aCompare, aBias) {
 
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -2237,7 +2259,7 @@ exports.MappingList = MappingList;
 
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -2357,7 +2379,7 @@ exports.quickSort = function (ary, comparator) {
 
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -2368,10 +2390,10 @@ exports.quickSort = function (ary, comparator) {
  */
 
 var util = __webpack_require__(0);
-var binarySearch = __webpack_require__(13);
+var binarySearch = __webpack_require__(14);
 var ArraySet = __webpack_require__(4).ArraySet;
 var base64VLQ = __webpack_require__(5);
-var quickSort = __webpack_require__(15).quickSort;
+var quickSort = __webpack_require__(16).quickSort;
 
 function SourceMapConsumer(aSourceMap) {
   var sourceMap = aSourceMap;
@@ -3445,7 +3467,7 @@ exports.IndexedSourceMapConsumer = IndexedSourceMapConsumer;
 
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -3864,7 +3886,7 @@ exports.SourceNode = SourceNode;
 
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -3873,18 +3895,18 @@ exports.SourceNode = SourceNode;
  * http://opensource.org/licenses/BSD-3-Clause
  */
 exports.SourceMapGenerator = __webpack_require__(6).SourceMapGenerator;
-exports.SourceMapConsumer = __webpack_require__(16).SourceMapConsumer;
-exports.SourceNode = __webpack_require__(17).SourceNode;
+exports.SourceMapConsumer = __webpack_require__(17).SourceMapConsumer;
+exports.SourceNode = __webpack_require__(18).SourceNode;
 
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports) {
 
 module.exports = require("main.js.map");
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__(7);
