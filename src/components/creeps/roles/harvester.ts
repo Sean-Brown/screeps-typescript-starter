@@ -13,7 +13,19 @@ export function run(creep: Creep): void {
   if (creepActions.needsRenew(creep)) {
     creepActions.moveToRenew(creep, spawn);
   } else if (_.sum(creep.carry) === creep.carryCapacity) {
-    _moveToDropEnergy(creep, spawn);
+    if (spawn.energy < spawn.energyCapacity) {
+      _moveToDropEnergy(creep, spawn);
+    } else {
+      const structures = creep.room.find<Structure>(FIND_MY_STRUCTURES);
+      if (structures.length) {
+        _moveToDropEnergy(creep, structures[0]);
+      } else {
+        const constructionSites = creep.room.find<ConstructionSite>(FIND_MY_CONSTRUCTION_SITES);
+        if (constructionSites.length) {
+          _moveToConstructionSite(creep, constructionSites[0]);
+        }
+      }
+    }
   } else {
     _moveToHarvest(creep, energySource);
   }
@@ -36,5 +48,11 @@ function _tryEnergyDropOff(creep: Creep, target: Spawn | Structure): number {
 function _moveToDropEnergy(creep: Creep, target: Spawn | Structure): void {
   if (_tryEnergyDropOff(creep, target) === ERR_NOT_IN_RANGE) {
     creepActions.moveTo(creep, target.pos);
+  }
+}
+
+function _moveToConstructionSite(creep: Creep, target: ConstructionSite): void {
+  if (creep.build(target) === ERR_NOT_IN_RANGE) {
+    creep.moveTo(target, { visualizePathStyle: { stroke: "#ffffff" } });
   }
 }

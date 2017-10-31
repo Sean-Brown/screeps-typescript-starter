@@ -1689,7 +1689,21 @@ function run(creep) {
         creepActions.moveToRenew(creep, spawn);
     }
     else if (_.sum(creep.carry) === creep.carryCapacity) {
-        _moveToDropEnergy(creep, spawn);
+        if (spawn.energy < spawn.energyCapacity) {
+            _moveToDropEnergy(creep, spawn);
+        }
+        else {
+            var structures = creep.room.find(FIND_MY_STRUCTURES);
+            if (structures.length) {
+                _moveToDropEnergy(creep, structures[0]);
+            }
+            else {
+                var constructionSites = creep.room.find(FIND_MY_CONSTRUCTION_SITES);
+                if (constructionSites.length) {
+                    _moveToConstructionSite(creep, constructionSites[0]);
+                }
+            }
+        }
     }
     else {
         _moveToHarvest(creep, energySource);
@@ -1710,6 +1724,11 @@ function _tryEnergyDropOff(creep, target) {
 function _moveToDropEnergy(creep, target) {
     if (_tryEnergyDropOff(creep, target) === ERR_NOT_IN_RANGE) {
         creepActions.moveTo(creep, target.pos);
+    }
+}
+function _moveToConstructionSite(creep, target) {
+    if (creep.build(target) === ERR_NOT_IN_RANGE) {
+        creep.moveTo(target, { visualizePathStyle: { stroke: "#ffffff" } });
     }
 }
 
