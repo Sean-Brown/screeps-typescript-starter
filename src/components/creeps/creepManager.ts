@@ -2,6 +2,7 @@ import * as Config from "../../config/config";
 
 import * as builder from "./roles/builder";
 import * as harvester from "./roles/harvester";
+import { Roles } from "./roles";
 
 import { log } from "../../lib/logger/log";
 
@@ -16,15 +17,15 @@ export function run(room: Room): void {
   const creepCount = _.size(creeps);
 
   if (Config.ENABLE_DEBUG_MODE) {
-    log.info(creepCount + " creeps found in the playground.");
+    log.info(`${creepCount} creeps found in the playground.`);
   }
 
   _buildMissingCreeps(room, creeps);
 
   _.each(creeps, (creep: Creep) => {
-    if (creep.memory.role === "harvester") {
+    if (Roles.IsHarvester(creep)) {
       harvester.run(creep);
-    } else if (creep.memory.role === "builder") {
+    } else if (Roles.IsBuilder(creep)) {
       builder.run(creep);
     }
   });
@@ -39,8 +40,8 @@ function _buildMissingCreeps(room: Room, creeps: Creep[]) {
   let bodyParts: string[];
 
   // Iterate through each creep and push them into the role array.
-  const harvesters = _.filter(creeps, (creep) => creep.memory.role === "harvester");
-  const builders = _.filter(creeps, (creep) => creep.memory.role === "builder");
+  const harvesters = _.filter(creeps, (creep) => Roles.IsHarvester(creep));
+  const builders = _.filter(creeps, (creep) => Roles.IsBuilder(creep));
 
   const spawns: Spawn[] = room.find<Spawn>(FIND_MY_SPAWNS, {
     filter: (spawn: Spawn) => {
@@ -50,7 +51,7 @@ function _buildMissingCreeps(room: Room, creeps: Creep[]) {
 
   if (Config.ENABLE_DEBUG_MODE) {
     if (spawns[0]) {
-      log.info("Spawn: " + spawns[0].name);
+      log.info(`Spawn: ${spawns[0].name}`);
     }
   }
 
@@ -62,13 +63,13 @@ function _buildMissingCreeps(room: Room, creeps: Creep[]) {
     }
 
     _.each(spawns, (spawn: Spawn) => {
-      _spawnCreep(spawn, bodyParts, "harvester");
+      _spawnCreep(spawn, bodyParts, Roles.Harvester);
     });
   }
   if (builders.length < 1 && harvesters.length > 1) {
     bodyParts = [WORK, WORK, MOVE];
     _.each(spawns, (spawn: Spawn) => {
-      _spawnCreep(spawn, bodyParts, "builder");
+      _spawnCreep(spawn, bodyParts, Roles.Builder);
     });
   }
 }
@@ -93,11 +94,11 @@ function _spawnCreep(spawn: Spawn, bodyParts: string[], role: string) {
   status = _.isString(status) ? OK : status;
   if (status === OK) {
     Memory.uuid = uuid + 1;
-    const creepName: string = spawn.room.name + " - " + role + uuid;
+    const creepName: string = `${spawn.room.name} - ${role} ${uuid}`;
 
-    log.info("Started creating new creep: " + creepName);
+    log.info(`Started creating new creep: ${creepName}`);
     if (Config.ENABLE_DEBUG_MODE) {
-      log.info("Body: " + bodyParts);
+      log.info(`Body: ${bodyParts}`);
     }
 
     status = spawn.createCreep(bodyParts, creepName, properties);
@@ -105,7 +106,7 @@ function _spawnCreep(spawn: Spawn, bodyParts: string[], role: string) {
     return _.isString(status) ? OK : status;
   } else {
     if (Config.ENABLE_DEBUG_MODE) {
-      log.info("Failed creating new creep: " + status);
+      log.info(`Failed creating new creep: ${status}`);
     }
 
     return status;
