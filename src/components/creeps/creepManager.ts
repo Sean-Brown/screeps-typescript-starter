@@ -65,7 +65,7 @@ function _buildMissingCreeps(room: Room, creeps: Creep[]) {
       _spawnCreep(spawn, bodyParts, "harvester");
     });
   }
-  if (builders.length < 1) {
+  if (builders.length < 1 && harvesters.length > 1) {
     bodyParts = [WORK, WORK, MOVE];
     _.each(spawns, (spawn: Spawn) => {
       _spawnCreep(spawn, bodyParts, "builder");

@@ -1506,6 +1506,10 @@ function canWork(creep) {
     }
 }
 exports.canWork = canWork;
+function creepBuildCost(bodyParts) {
+    return bodyParts.reduce(function (cost, part) { return cost + BODYPART_COST[part]; }, 0);
+}
+exports.creepBuildCost = creepBuildCost;
 
 
 /***/ }),
@@ -1561,7 +1565,7 @@ function _buildMissingCreeps(room, creeps) {
             _spawnCreep(spawn, bodyParts, "harvester");
         });
     }
-    if (builders.length < 1) {
+    if (builders.length < 1 && harvesters.length > 1) {
         bodyParts = [WORK, WORK, MOVE];
         _.each(spawns, function (spawn) {
             _spawnCreep(spawn, bodyParts, "builder");

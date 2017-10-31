@@ -89,3 +89,14 @@ export function canWork(creep: Creep): boolean {
     return creep.memory.working;
   }
 }
+
+/**
+ * Returns the cost of calculating a creep given the body parts
+ *
+ * @export
+ * @param {string[]} bodyParts
+ * @returns {number}
+ */
+export function creepBuildCost(bodyParts: string[]): number {
+  return bodyParts.reduce((cost, part) => cost + BODYPART_COST[part], 0);
+}
