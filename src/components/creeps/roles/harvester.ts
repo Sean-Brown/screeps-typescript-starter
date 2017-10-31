@@ -8,8 +8,6 @@ import * as creepActions from "../creepActions";
  */
 export function run(creep: Creep): void {
   const spawn = creep.room.find<Spawn>(FIND_MY_SPAWNS)[0];
-  const energySource = creep.room.find<Source>(FIND_SOURCES_ACTIVE)[0];
-
   if (creepActions.needsRenew(creep)) {
     creepActions.moveToRenew(creep, spawn);
   } else if (_.sum(creep.carry) === creep.carryCapacity) {
@@ -20,14 +18,23 @@ export function run(creep: Creep): void {
       if (structures.length) {
         _moveToDropEnergy(creep, structures[0]);
       } else {
-        const constructionSites = creep.room.find<ConstructionSite>(FIND_MY_CONSTRUCTION_SITES);
+        let constructionSites = creep.room.find<ConstructionSite>(FIND_MY_CONSTRUCTION_SITES);
         if (constructionSites.length) {
+          // Find the closest construction site
+          constructionSites = constructionSites.sort((siteA, siteB) => {
+            const lenA = creep.room.findPath(creep.pos, siteA.pos).length;
+            const lenB = creep.room.findPath(creep.pos, siteB.pos).length;
+            return lenA > lenB ? 1 : lenA < lenB ? -1 : 0;
+          });
           _moveToConstructionSite(creep, constructionSites[0]);
         }
       }
     }
   } else {
-    _moveToHarvest(creep, energySource);
+    const energySources = creep.room.find<Source>(FIND_SOURCES_ACTIVE);
+    if (energySources.length) {
+      _moveToHarvest(creep, energySources[0]);
+    }
   }
 }
 
