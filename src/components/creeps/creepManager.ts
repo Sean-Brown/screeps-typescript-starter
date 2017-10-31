@@ -87,7 +87,7 @@ function _spawnCreep(spawn: Spawn, bodyParts: string[], role: string) {
   let status: number | string = spawn.canCreateCreep(bodyParts, undefined);
 
   const properties: { [key: string]: any } = {
-    role,
+    role: role,
     room: spawn.room.name,
   };
 
