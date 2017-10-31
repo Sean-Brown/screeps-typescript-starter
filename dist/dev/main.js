@@ -1859,11 +1859,11 @@ function run(creep) {
         creep.say("Repairing");
     }
     if (creep.memory.repairing) {
-        var structures = creep.room.find(FIND_MY_STRUCTURES);
-        if (structures.length) {
+        var hitStructures = creep.room.find(FIND_MY_STRUCTURES).filter(function (s) { return s.hits < s.hitsMax; });
+        if (hitStructures.length) {
             log_1.log.info("repairing structures");
-            structures = creepActions.sortMostNeedingRepair(structures);
-            creepActions.moveToRepair(creep, structures[0]);
+            hitStructures = creepActions.sortMostNeedingRepair(hitStructures);
+            creepActions.moveToRepair(creep, hitStructures[0]);
         }
         else {
             var constructionSites = creep.room.find(FIND_MY_CONSTRUCTION_SITES);

@@ -19,12 +19,12 @@ export function run(creep: Creep): void {
   }
 
   if (creep.memory.repairing) {
-    let structures = creep.room.find<Structure>(FIND_MY_STRUCTURES);
-    if (structures.length) {
+    let hitStructures = creep.room.find<Structure>(FIND_MY_STRUCTURES).filter((s: Structure) => s.hits < s.hitsMax);
+    if (hitStructures.length) {
       log.info("repairing structures");
       // Find the closest structure
-      structures = creepActions.sortMostNeedingRepair(structures);
-      creepActions.moveToRepair(creep, structures[0]);
+      hitStructures = creepActions.sortMostNeedingRepair(hitStructures);
+      creepActions.moveToRepair(creep, hitStructures[0]);
     } else {
       let constructionSites = creep.room.find<ConstructionSite>(FIND_MY_CONSTRUCTION_SITES);
       if (constructionSites.length) {
