@@ -1607,18 +1607,18 @@ function _spawnCreep(spawn, bodyParts, role) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Roles = (function () {
-    function Roles() {
+var CreepRoles = (function () {
+    function CreepRoles() {
     }
-    Roles.IsBuilder = function (creep) {
-        return creep.memory.role === Roles.Builder;
+    CreepRoles.prototype.IsBuilder = function (creep) {
+        return creep.memory.role === this.Builder;
     };
-    Roles.IsHarvester = function (creep) {
-        return creep.memory.role === Roles.Harvester;
+    CreepRoles.prototype.IsHarvester = function (creep) {
+        return creep.memory.role === this.Harvester;
     };
-    return Roles;
+    return CreepRoles;
 }());
-exports.Roles = Roles;
+exports.Roles = new CreepRoles();
 
 
 /***/ }),

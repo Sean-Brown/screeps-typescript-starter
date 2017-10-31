@@ -1,12 +1,13 @@
-export class Roles {
-  public static readonly Builder: "builder";
-  public static readonly Harvester: "harvester";
+class CreepRoles {
+  public readonly Builder: "builder";
+  public readonly Harvester: "harvester";
 
-  public static IsBuilder(creep: Creep): boolean {
-    return creep.memory.role === Roles.Builder;
+  public IsBuilder(creep: Creep): boolean {
+    return creep.memory.role === this.Builder;
   }
 
-  public static IsHarvester(creep: Creep): boolean {
-    return creep.memory.role === Roles.Harvester;
+  public IsHarvester(creep: Creep): boolean {
+    return creep.memory.role === this.Harvester;
   }
 }
+export const Roles = new CreepRoles();
