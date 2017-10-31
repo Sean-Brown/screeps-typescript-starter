@@ -1816,8 +1816,8 @@ function run(creep) {
             else {
                 var structures = creep.room.find(FIND_MY_STRUCTURES);
                 if (structures.length) {
-                    structures = creepActions.sortMostNeedingRepair(structures);
-                    creepActions.moveToRepair(creep, structures[0]);
+                    structures = creepActions.sortMostNeedingEnergy(structures);
+                    creepActions.moveToDropEnergy(creep, structures[0]);
                 }
                 else {
                     var constructionSites = creep.room.find(FIND_MY_CONSTRUCTION_SITES);
