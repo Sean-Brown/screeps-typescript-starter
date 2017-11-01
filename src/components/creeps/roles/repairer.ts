@@ -25,9 +25,8 @@ export function run(creep: Creep): void {
       creepActions.moveToRepair(creep, hitStructures[0]);
     } else {
       let depletedStructures = structures.filter((s: Structure) => {
-        const decaying = (s as creepActions.StructureDecay);
-        if (decaying && decaying.ticksToDecay < 300) {
-          return decaying;
+        if (creepActions.structureIsDecaying(s)) {
+          return s;
         }
       });
       if (depletedStructures.length) {

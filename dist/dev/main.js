@@ -876,6 +876,32 @@ function moveToConstructionSite(creep, target) {
     }
 }
 exports.moveToConstructionSite = moveToConstructionSite;
+function structureIsDecaying(structure) {
+    if (hasDecay(structure)) {
+        var rampart = structure;
+        if (rampart) {
+            return rampart.ticksToDecay < 300;
+        }
+        var road = structure;
+        if (road) {
+            return road.ticksToDecay < 300;
+        }
+        var powerBank = structure;
+        if (powerBank) {
+            return powerBank.ticksToDecay < 300;
+        }
+        var container = structure;
+        if (container) {
+            return container.ticksToDecay < 300;
+        }
+        var portal = structure;
+        if (portal) {
+            return portal.ticksToDecay < 300;
+        }
+    }
+    return false;
+}
+exports.structureIsDecaying = structureIsDecaying;
 
 
 /***/ }),
@@ -1879,9 +1905,8 @@ function run(creep) {
         }
         else {
             var depletedStructures = structures.filter(function (s) {
-                var decaying = s;
-                if (decaying && decaying.ticksToDecay < 300) {
-                    return decaying;
+                if (creepActions.structureIsDecaying(s)) {
+                    return s;
                 }
             });
             if (depletedStructures.length) {

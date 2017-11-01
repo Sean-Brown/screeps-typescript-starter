@@ -151,7 +151,7 @@ function isController(item: Structure | Spawn): boolean {
   return item.structureType === STRUCTURE_CONTROLLER;
 }
 
-export interface StructureDecay extends Structure {
+interface StructureDecay extends Structure {
   ticksToDecay: number;
 }
 
@@ -233,4 +233,30 @@ export function moveToConstructionSite(creep: Creep, target: ConstructionSite): 
   if (creep.build(target) === ERR_NOT_IN_RANGE) {
     moveTo(creep, target.pos);
   }
+}
+
+export function structureIsDecaying(structure: Structure): boolean {
+  if (hasDecay(structure)) {
+    const rampart = structure as Rampart;
+    if (rampart) {
+      return rampart.ticksToDecay < 300;
+    }
+    const road = structure as StructureRoad;
+    if (road) {
+      return road.ticksToDecay < 300;
+    }
+    const powerBank = structure as PowerBank;
+    if (powerBank) {
+      return powerBank.ticksToDecay < 300;
+    }
+    const container = structure as Container;
+    if (container) {
+      return container.ticksToDecay < 300;
+    }
+    const portal = structure as StructurePortal;
+    if (portal) {
+      return portal.ticksToDecay < 300;
+    }
+  }
+  return false;
 }
