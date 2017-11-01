@@ -24,11 +24,7 @@ export function run(creep: Creep): void {
       hitStructures = creepActions.sortMostNeedingRepair(hitStructures);
       creepActions.moveToRepair(creep, hitStructures[0]);
     } else {
-      let depletedStructures = structures.filter((s: Structure) => {
-        if (creepActions.structureIsDecaying(s)) {
-          return s;
-        }
-      });
+      let depletedStructures = structures.filter((s: Structure) => creepActions.structureIsDecaying(s));
       if (depletedStructures.length) {
         depletedStructures = creepActions.sortMostNeedingEnergy(depletedStructures);
         creepActions.moveToDropEnergy(creep, depletedStructures[0]);

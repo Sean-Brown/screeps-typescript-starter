@@ -812,8 +812,10 @@ function sortMostNeedingEnergy(structures) {
         }
         else if (chooseA && chooseB) {
             if (aIsController && bIsController) {
-                var aTicks = sA.ticksToDowngrade;
-                var bTicks = sB.ticksToDowngrade;
+                var aController = sA;
+                var aTicks = aController ? aController.ticksToDowngrade : 0;
+                var bController = sB;
+                var bTicks = bController ? bController.ticksToDowngrade : 0;
                 return aTicks < bTicks ? 1 : bTicks > aTicks ? -1 : 0;
             }
             else if (aIsController && !bIsController) {
@@ -823,8 +825,8 @@ function sortMostNeedingEnergy(structures) {
                 return -1;
             }
             else {
-                var aTicks = sA.ticksToDecay;
-                var bTicks = sB.ticksToDecay;
+                var aTicks = getStructureTicksToDecay(sA);
+                var bTicks = getStructureTicksToDecay(sB);
                 return aTicks < bTicks ? 1 : bTicks < aTicks ? -1 : 0;
             }
         }
@@ -876,30 +878,32 @@ function moveToConstructionSite(creep, target) {
     }
 }
 exports.moveToConstructionSite = moveToConstructionSite;
-function structureIsDecaying(structure) {
-    if (hasDecay(structure)) {
-        var rampart = structure;
-        if (rampart) {
-            return rampart.ticksToDecay < 300;
-        }
-        var road = structure;
-        if (road) {
-            return road.ticksToDecay < 300;
-        }
-        var powerBank = structure;
-        if (powerBank) {
-            return powerBank.ticksToDecay < 300;
-        }
-        var container = structure;
-        if (container) {
-            return container.ticksToDecay < 300;
-        }
-        var portal = structure;
-        if (portal) {
-            return portal.ticksToDecay < 300;
-        }
+function getStructureTicksToDecay(structure) {
+    var rampart = structure;
+    if (rampart) {
+        return rampart.ticksToDecay;
     }
-    return false;
+    var road = structure;
+    if (road) {
+        return road.ticksToDecay;
+    }
+    var powerBank = structure;
+    if (powerBank) {
+        return powerBank.ticksToDecay;
+    }
+    var container = structure;
+    if (container) {
+        return container.ticksToDecay;
+    }
+    var portal = structure;
+    if (portal) {
+        return portal.ticksToDecay;
+    }
+    return -1;
+}
+function structureIsDecaying(structure) {
+    var ticksToDecay = getStructureTicksToDecay(structure);
+    return ticksToDecay > -1 && ticksToDecay < 300;
 }
 exports.structureIsDecaying = structureIsDecaying;
 
@@ -1904,11 +1908,7 @@ function run(creep) {
             creepActions.moveToRepair(creep, hitStructures[0]);
         }
         else {
-            var depletedStructures = structures.filter(function (s) {
-                if (creepActions.structureIsDecaying(s)) {
-                    return s;
-                }
-            });
+            var depletedStructures = structures.filter(function (s) { return creepActions.structureIsDecaying(s); });
             if (depletedStructures.length) {
                 depletedStructures = creepActions.sortMostNeedingEnergy(depletedStructures);
                 creepActions.moveToDropEnergy(creep, depletedStructures[0]);

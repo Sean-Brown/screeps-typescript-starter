@@ -151,10 +151,6 @@ function isController(item: Structure | Spawn): boolean {
   return item.structureType === STRUCTURE_CONTROLLER;
 }
 
-interface StructureDecay extends Structure {
-  ticksToDecay: number;
-}
-
 export function sortMostNeedingEnergy(structures: Array<Structure|Spawn>): Array<Structure|Spawn> {
   return structures.sort((sA, sB) => {
     const aIsController = isController(sA);
@@ -169,16 +165,18 @@ export function sortMostNeedingEnergy(structures: Array<Structure|Spawn>): Array
       return -1;
     } else if (chooseA && chooseB) {
       if (aIsController && bIsController) {
-        const aTicks = (sA as Controller).ticksToDowngrade;
-        const bTicks = (sB as Controller).ticksToDowngrade;
+        const aController = (sA as Controller);
+        const aTicks = aController ? aController.ticksToDowngrade : 0;
+        const bController = (sB as Controller);
+        const bTicks = bController ? bController.ticksToDowngrade : 0;
         return aTicks < bTicks ? 1 : bTicks > aTicks ? -1 : 0;
       } else if (aIsController && !bIsController) {
         return 1;
       } else if (bIsController && !aIsController) {
         return -1;
       } else {
-        const aTicks = (sA as StructureDecay).ticksToDecay;
-        const bTicks = (sB as StructureDecay).ticksToDecay;
+        const aTicks = getStructureTicksToDecay(sA);
+        const bTicks = getStructureTicksToDecay(sB);
         return aTicks < bTicks ? 1 : bTicks < aTicks ? -1 : 0;
       }
     } else {
@@ -235,28 +233,31 @@ export function moveToConstructionSite(creep: Creep, target: ConstructionSite): 
   }
 }
 
-export function structureIsDecaying(structure: Structure): boolean {
-  if (hasDecay(structure)) {
-    const rampart = structure as Rampart;
-    if (rampart) {
-      return rampart.ticksToDecay < 300;
-    }
-    const road = structure as StructureRoad;
-    if (road) {
-      return road.ticksToDecay < 300;
-    }
-    const powerBank = structure as PowerBank;
-    if (powerBank) {
-      return powerBank.ticksToDecay < 300;
-    }
-    const container = structure as Container;
-    if (container) {
-      return container.ticksToDecay < 300;
-    }
-    const portal = structure as StructurePortal;
-    if (portal) {
-      return portal.ticksToDecay < 300;
-    }
+function getStructureTicksToDecay(structure: Structure): number {
+  const rampart = structure as Rampart;
+  if (rampart) {
+    return rampart.ticksToDecay;
   }
-  return false;
+  const road = structure as StructureRoad;
+  if (road) {
+    return road.ticksToDecay;
+  }
+  const powerBank = structure as PowerBank;
+  if (powerBank) {
+    return powerBank.ticksToDecay;
+  }
+  const container = structure as Container;
+  if (container) {
+    return container.ticksToDecay;
+  }
+  const portal = structure as StructurePortal;
+  if (portal) {
+    return portal.ticksToDecay;
+  }
+  return -1;
+}
+
+export function structureIsDecaying(structure: Structure): boolean {
+  const ticksToDecay = getStructureTicksToDecay(structure);
+  return ticksToDecay > -1 && ticksToDecay < 300;
 }
