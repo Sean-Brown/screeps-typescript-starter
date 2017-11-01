@@ -1,5 +1,7 @@
 import * as creepActions from "../creepActions";
 
+import {log} from "../../../lib/logger/log";
+
 /**
  * Runs repairer actions.
  *
@@ -22,23 +24,31 @@ export function run(creep: Creep): void {
     if (hitStructures.length) {
       // Find the closest structure
       hitStructures = creepActions.sortMostNeedingRepair(hitStructures);
-      creepActions.moveToRepair(creep, hitStructures[0]);
+      const structure = hitStructures[0];
+      log.info(`repairing repairing ${structure.id} ${structure.pos}`);
+      creepActions.moveToRepair(creep, structure);
     } else {
       let depletedStructures = structures.filter((s: Structure) => creepActions.structureIsDecaying(s));
       if (depletedStructures.length) {
         depletedStructures = creepActions.sortMostNeedingEnergy(depletedStructures);
-        creepActions.moveToDropEnergy(creep, depletedStructures[0]);
+        const structure = depletedStructures[0];
+        log.info(`repairer replenishing ${structure.id} ${structure.pos}`);
+        creepActions.moveToDropEnergy(creep, structure);
       } else {
         let constructionSites = creep.room.find<ConstructionSite>(FIND_MY_CONSTRUCTION_SITES);
         if (constructionSites.length) {
           // Find the closest construction site
           constructionSites = creepActions.sortClosestConstructionSites(creep, constructionSites);
-          creepActions.moveToConstructionSite(creep, constructionSites[0]);
+          const structure = constructionSites[0];
+          log.info(`repairer moving to construction site ${structure.id} ${structure.pos}`);
+          creepActions.moveToConstructionSite(creep, structure);
         } else {
           let spawns = creep.room.find<Spawn>(FIND_MY_SPAWNS);
           if (spawns.length) {
             spawns = creepActions.sortMostNeedingRepair(spawns) as Spawn[];
-            creepActions.moveToRepair(creep, spawns[0]);
+            const spawn = spawns[0];
+            log.info(`repairer moving to construction site ${spawn.id} ${spawn.pos}`);
+            creepActions.moveToRepair(creep, spawn);
           }
         }
       }
