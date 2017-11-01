@@ -47,7 +47,7 @@ export function run(creep: Creep): void {
           if (spawns.length) {
             spawns = creepActions.sortMostNeedingRepair(spawns) as Spawn[];
             const spawn = spawns[0];
-            log.info(`repairer moving to construction site ${spawn.id} ${spawn.pos}`);
+            log.info(`repairer moving to spawn ${spawn.id} ${spawn.pos}`);
             creepActions.moveToRepair(creep, spawn);
           }
         }

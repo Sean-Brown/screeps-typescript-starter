@@ -1931,7 +1931,7 @@ function run(creep) {
                     if (spawns.length) {
                         spawns = creepActions.sortMostNeedingRepair(spawns);
                         var spawn = spawns[0];
-                        log_1.log.info("repairer moving to construction site " + spawn.id + " " + spawn.pos);
+                        log_1.log.info("repairer moving to spawn " + spawn.id + " " + spawn.pos);
                         creepActions.moveToRepair(creep, spawn);
                     }
                 }
