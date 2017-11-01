@@ -1871,22 +1871,35 @@ function run(creep) {
         creep.say("Repairing");
     }
     if (creep.memory.repairing) {
-        var hitStructures = creep.room.find(FIND_MY_STRUCTURES).filter(function (s) { return s.hits < s.hitsMax; });
+        var structures = creep.room.find(FIND_MY_STRUCTURES);
+        var hitStructures = structures.filter(function (s) { return s.hits < s.hitsMax; });
         if (hitStructures.length) {
             hitStructures = creepActions.sortMostNeedingRepair(hitStructures);
             creepActions.moveToRepair(creep, hitStructures[0]);
         }
         else {
-            var constructionSites = creep.room.find(FIND_MY_CONSTRUCTION_SITES);
-            if (constructionSites.length) {
-                constructionSites = creepActions.sortClosestConstructionSites(creep, constructionSites);
-                creepActions.moveToConstructionSite(creep, constructionSites[0]);
+            var depletedStructures = structures.filter(function (s) {
+                var decaying = s;
+                if (decaying && decaying.ticksToDecay < 300) {
+                    return decaying;
+                }
+            });
+            if (depletedStructures.length) {
+                depletedStructures = creepActions.sortMostNeedingEnergy(depletedStructures);
+                creepActions.moveToDropEnergy(creep, depletedStructures[0]);
             }
             else {
-                var spawns = creep.room.find(FIND_MY_SPAWNS);
-                if (spawns.length) {
-                    spawns = creepActions.sortMostNeedingRepair(spawns);
-                    creepActions.moveToRepair(creep, spawns[0]);
+                var constructionSites = creep.room.find(FIND_MY_CONSTRUCTION_SITES);
+                if (constructionSites.length) {
+                    constructionSites = creepActions.sortClosestConstructionSites(creep, constructionSites);
+                    creepActions.moveToConstructionSite(creep, constructionSites[0]);
+                }
+                else {
+                    var spawns = creep.room.find(FIND_MY_SPAWNS);
+                    if (spawns.length) {
+                        spawns = creepActions.sortMostNeedingRepair(spawns);
+                        creepActions.moveToRepair(creep, spawns[0]);
+                    }
                 }
             }
         }

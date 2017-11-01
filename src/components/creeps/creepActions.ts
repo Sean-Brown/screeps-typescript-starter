@@ -151,7 +151,7 @@ function isController(item: Structure | Spawn): boolean {
   return item.structureType === STRUCTURE_CONTROLLER;
 }
 
-interface StructureDecay extends Structure {
+export interface StructureDecay extends Structure {
   ticksToDecay: number;
 }
 
