@@ -923,6 +923,9 @@ var creepActions = __webpack_require__(2);
 var log_1 = __webpack_require__(0);
 function run(creep) {
     if (creepActions.needsRenew(creep)) {
+        if (_.sum(creep.carry) > 0) {
+            return true;
+        }
         var spawn = creep.pos.findClosestByPath(FIND_MY_SPAWNS);
         if (spawn) {
             creepActions.moveToRenew(creep, spawn);
