@@ -1907,7 +1907,7 @@ function run(creep) {
         creepActions.moveToDropEnergy(creep, spawn);
         return;
     }
-    var containers = creep.room.find(FIND_MY_STRUCTURES, {
+    var containers = creep.room.find(FIND_STRUCTURES, {
         filter: function (s) { return (s.structureType === STRUCTURE_CONTAINER) && (s.store < s.storeCapacity); },
     });
     if (containers.length) {

@@ -30,7 +30,7 @@ export function run(creep: Creep): void {
   }
 
   // Find containers that need energy
-  const containers = creep.room.find<Container>(FIND_MY_STRUCTURES, {
+  const containers = creep.room.find<Container>(FIND_STRUCTURES, {
     filter: (s: Structure) => (s.structureType === STRUCTURE_CONTAINER) && ((s as Container).store < (s as Container).storeCapacity),
   });
   if (containers.length) {
