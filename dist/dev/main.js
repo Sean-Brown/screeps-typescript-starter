@@ -1907,11 +1907,10 @@ function run(creep) {
         creepActions.moveToDropEnergy(creep, spawn);
         return;
     }
-    var containers = creep.room.find(FIND_STRUCTURES, {
+    var container = creep.pos.findClosestByPath(FIND_STRUCTURES, {
         filter: function (s) { return (s.structureType === STRUCTURE_CONTAINER) && (s.store < s.storeCapacity); },
     });
-    if (containers.length) {
-        var container = creepActions.sortByClosest(creep, containers)[0];
+    if (container) {
         log_1.log.info("creep " + creep.name + " moving energy to container " + container.id);
         creepActions.moveToDropEnergy(creep, container);
         return;

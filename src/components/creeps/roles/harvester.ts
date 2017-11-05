@@ -30,11 +30,10 @@ export function run(creep: Creep): void {
   }
 
   // Find containers that need energy
-  const containers = creep.room.find<Container>(FIND_STRUCTURES, {
+  const container = creep.pos.findClosestByPath<Container>(FIND_STRUCTURES, {
     filter: (s: Structure) => (s.structureType === STRUCTURE_CONTAINER) && ((s as Container).store < (s as Container).storeCapacity),
   });
-  if (containers.length) {
-    const container = creepActions.sortByClosest(creep, containers)[0];
+  if (container) {
     log.info(`creep ${creep.name} moving energy to container ${container.id}`);
     creepActions.moveToDropEnergy(creep, container);
     return;
