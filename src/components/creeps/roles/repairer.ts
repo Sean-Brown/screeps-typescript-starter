@@ -73,6 +73,15 @@ export function run(creep: Creep): void {
       return;
     }
 
+    // Find ramparts with less than 20% hp remaining
+    const ramparts = creep.room.find<Rampart>(FIND_MY_STRUCTURES, {
+      filter: (s: Structure) => (s.structureType === STRUCTURE_RAMPART) && (s.hits < s.hitsMax) && (s.hits < (s.hitsMax * .2)),
+    });
+    if (ramparts.length) {
+      repairStructure(creep, creepActions.sortMostNeedingRepair(ramparts)[0]);
+      return;
+    }
+
     // Find roads with less than 20% hp remaining
     const roadStructures = creep.room.find<StructureRoad>(FIND_STRUCTURES, {
       filter: (s: Structure) => (s.structureType === STRUCTURE_ROAD) && (s.hits < (s.hitsMax * .2)),

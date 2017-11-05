@@ -1992,6 +1992,13 @@ function run(creep) {
             repairStructure(creep, creepActions.sortMostNeedingRepair(spawns)[0]);
             return;
         }
+        var ramparts = creep.room.find(FIND_MY_STRUCTURES, {
+            filter: function (s) { return (s.structureType === STRUCTURE_RAMPART) && (s.hits < s.hitsMax) && (s.hits < (s.hitsMax * .2)); },
+        });
+        if (ramparts.length) {
+            repairStructure(creep, creepActions.sortMostNeedingRepair(ramparts)[0]);
+            return;
+        }
         var roadStructures = creep.room.find(FIND_STRUCTURES, {
             filter: function (s) { return (s.structureType === STRUCTURE_ROAD) && (s.hits < (s.hitsMax * .2)); },
         });
