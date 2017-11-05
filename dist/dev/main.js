@@ -1891,7 +1891,7 @@ function run(creep) {
     });
     if (spawns.length) {
         var spawn = creepActions.sortByClosest(creep, spawns)[0];
-        console.info("creep " + creep.name + " moving energy to spawn " + spawn.name);
+        log_1.log.info("creep " + creep.name + " moving energy to spawn " + spawn.name);
         creepActions.moveToDropEnergy(creep, spawn);
         return;
     }
@@ -1900,7 +1900,7 @@ function run(creep) {
     });
     if (containers.length) {
         var container = creepActions.sortByClosest(creep, containers)[0];
-        console.info("creep " + creep.name + " moving energy to container " + container.id);
+        log_1.log.info("creep " + creep.name + " moving energy to container " + container.id);
         creepActions.moveToDropEnergy(creep, container);
         return;
     }

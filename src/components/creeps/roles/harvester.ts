@@ -24,7 +24,7 @@ export function run(creep: Creep): void {
   });
   if (spawns.length) {
     const spawn = creepActions.sortByClosest(creep, spawns)[0];
-    console.info(`creep ${creep.name} moving energy to spawn ${spawn.name}`);
+    log.info(`creep ${creep.name} moving energy to spawn ${spawn.name}`);
     creepActions.moveToDropEnergy(creep, spawn);
     return;
   }
@@ -35,7 +35,7 @@ export function run(creep: Creep): void {
   });
   if (containers.length) {
     const container = creepActions.sortByClosest(creep, containers)[0];
-    console.info(`creep ${creep.name} moving energy to container ${container.id}`);
+    log.info(`creep ${creep.name} moving energy to container ${container.id}`);
     creepActions.moveToDropEnergy(creep, container);
     return;
   }
