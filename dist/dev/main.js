@@ -1908,7 +1908,7 @@ function run(creep) {
         return;
     }
     var containers = creep.room.find(FIND_MY_STRUCTURES, {
-        filter: function (s) { return s.structureType === STRUCTURE_CONTAINER && s.store < s.storeCapacity; },
+        filter: function (s) { return (s.structureType === STRUCTURE_CONTAINER) && (s.store < s.storeCapacity); },
     });
     if (containers.length) {
         var container = creepActions.sortByClosest(creep, containers)[0];
