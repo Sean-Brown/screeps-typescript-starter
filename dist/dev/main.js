@@ -744,7 +744,7 @@ function harvestClosestSource(creep) {
     if (sources.length) {
         sources = sortClosestEnergySources(creep, sources);
         var source = sources[0];
-        log_1.log.info("harvester " + creep.name + " harvesting from " + source.id + ", " + source.pos);
+        log_1.log.debug("harvester " + creep.name + " harvesting from " + source.id + ", " + source.pos);
         moveToHarvest(creep, source);
     }
 }
