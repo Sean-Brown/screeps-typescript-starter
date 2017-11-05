@@ -47,7 +47,7 @@ export function tryRenew(creep: Creep, spawn: Spawn): number {
  */
 export function moveToRenew(creep: Creep, spawn: Spawn): void {
   if (tryRenew(creep, spawn) === ERR_NOT_IN_RANGE) {
-    creep.moveTo(spawn);
+    moveTo(creep, spawn);
   }
 }
 
@@ -107,7 +107,9 @@ export function harvestClosestSource(creep: Creep) {
   let sources = creep.room.find<Source>(FIND_SOURCES);
   if (sources.length) {
     sources = sortClosestEnergySources(creep, sources);
-    moveToHarvest(creep, sources[0]);
+    const source = sources[0];
+    log.info(`harvester ${creep.name} harvesting from ${source.id}, ${source.pos}`);
+    moveToHarvest(creep, source);
   }
 }
 
@@ -221,7 +223,8 @@ export function moveToDropEnergy(creep: Creep, target: Spawn | Structure): void 
 }
 
 export function moveToRepair(creep: Creep, target: Spawn | Structure): void {
-  log.info(`moving to repair target ${target.id} ${target.pos} ${target.hits} of ${target.hitsMax}`);
+  log.info( `harveseter ${creep.name} moving to repair target ${target.id}` +
+            `, ${target.pos}, ${target.hits} of ${target.hitsMax}`);
   if (creep.repair(target) === ERR_NOT_IN_RANGE) {
     moveTo(creep, target.pos);
   }

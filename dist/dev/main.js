@@ -726,7 +726,7 @@ function tryRenew(creep, spawn) {
 exports.tryRenew = tryRenew;
 function moveToRenew(creep, spawn) {
     if (tryRenew(creep, spawn) === ERR_NOT_IN_RANGE) {
-        creep.moveTo(spawn);
+        moveTo(creep, spawn);
     }
 }
 exports.moveToRenew = moveToRenew;
@@ -765,7 +765,9 @@ function harvestClosestSource(creep) {
     var sources = creep.room.find(FIND_SOURCES);
     if (sources.length) {
         sources = sortClosestEnergySources(creep, sources);
-        moveToHarvest(creep, sources[0]);
+        var source = sources[0];
+        log_1.log.info("harvester " + creep.name + " harvesting from " + source.id + ", " + source.pos);
+        moveToHarvest(creep, source);
     }
 }
 exports.harvestClosestSource = harvestClosestSource;
@@ -866,7 +868,8 @@ function moveToDropEnergy(creep, target) {
 }
 exports.moveToDropEnergy = moveToDropEnergy;
 function moveToRepair(creep, target) {
-    log_1.log.info("moving to repair target " + target.id + " " + target.pos + " " + target.hits + " of " + target.hitsMax);
+    log_1.log.info("harveseter " + creep.name + " moving to repair target " + target.id +
+        (", " + target.pos + ", " + target.hits + " of " + target.hitsMax));
     if (creep.repair(target) === ERR_NOT_IN_RANGE) {
         moveTo(creep, target.pos);
     }
