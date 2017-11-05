@@ -1908,7 +1908,7 @@ function run(creep) {
         return;
     }
     var container = creep.pos.findClosestByPath(FIND_STRUCTURES, {
-        filter: function (s) { return (s.structureType === STRUCTURE_CONTAINER) && (s.store < s.storeCapacity); },
+        filter: function (s) { return (s.structureType === STRUCTURE_CONTAINER) && (_.sum(s.store) < s.storeCapacity); },
     });
     if (container) {
         log_1.log.info("creep " + creep.name + " moving energy to container " + container.id);

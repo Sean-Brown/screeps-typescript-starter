@@ -31,7 +31,7 @@ export function run(creep: Creep): void {
 
   // Find containers that need energy
   const container = creep.pos.findClosestByPath<Container>(FIND_STRUCTURES, {
-    filter: (s: Structure) => (s.structureType === STRUCTURE_CONTAINER) && ((s as Container).store < (s as Container).storeCapacity),
+    filter: (s: Structure) => (s.structureType === STRUCTURE_CONTAINER) && (_.sum((s as Container).store) < (s as Container).storeCapacity),
   });
   if (container) {
     log.info(`creep ${creep.name} moving energy to container ${container.id}`);
