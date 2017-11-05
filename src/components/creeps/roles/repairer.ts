@@ -14,6 +14,11 @@ function replenishStructure(creep: Creep, structure: Structure) {
   creepActions.moveToDropEnergy(creep, structure);
 }
 
+function construct(creep: Creep, site: ConstructionSite) {
+  log.info(`repairer ${creep.name} constructing ${site.id}, ${site.pos}`);
+  creepActions.moveToConstructionSite(creep, site);
+}
+
 /**
  * Runs repairer actions.
  *
@@ -43,7 +48,12 @@ export function run(creep: Creep): void {
         } else {
           repairStructure(creep, structure);
         }
-        return;
+        // If the structure is more than 90% repaired and replenished, then choose a new structure
+        if ((structure.hits >= (structure.hitsMax * .9)) && (!creepActions.structureIsDecaying(structure))) {
+          creep.memory.structure = null;
+        } else {
+          return;
+        }
       }
     }
 
@@ -82,6 +92,13 @@ export function run(creep: Creep): void {
     });
     if (decayingStructures.length) {
       replenishStructure(creep, creepActions.sortMostNeedingEnergy(decayingStructures)[0]);
+      return;
+    }
+
+    // Fall back to helping in construction
+    const site = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES) as ConstructionSite;
+    if (site) {
+      construct(creep, site);
       return;
     }
 

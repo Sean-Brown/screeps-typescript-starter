@@ -1905,6 +1905,10 @@ function replenishStructure(creep, structure) {
     creep.memory.structure = structure.id;
     creepActions.moveToDropEnergy(creep, structure);
 }
+function construct(creep, site) {
+    log_1.log.info("repairer " + creep.name + " constructing " + site.id + ", " + site.pos);
+    creepActions.moveToConstructionSite(creep, site);
+}
 function run(creep) {
     if (creep.memory.repairing && creep.carry.energy === 0) {
         creep.memory.repairing = false;
@@ -1927,7 +1931,12 @@ function run(creep) {
                 else {
                     repairStructure(creep, structure);
                 }
-                return;
+                if ((structure.hits >= (structure.hitsMax * .9)) && (!creepActions.structureIsDecaying(structure))) {
+                    creep.memory.structure = null;
+                }
+                else {
+                    return;
+                }
             }
         }
         var spawns = creep.room.find(FIND_MY_SPAWNS, {
@@ -1956,6 +1965,11 @@ function run(creep) {
         });
         if (decayingStructures.length) {
             replenishStructure(creep, creepActions.sortMostNeedingEnergy(decayingStructures)[0]);
+            return;
+        }
+        var site = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
+        if (site) {
+            construct(creep, site);
             return;
         }
         log_1.log.warning("idle repairer " + creep.name);
