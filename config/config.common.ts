@@ -36,7 +36,7 @@ export function init(options: EnvOptions): Config {
   config
     .output
       .path(path.join(ROOT, "dist", ENV))
-      .filename("main.js")
+      .filename("[name].js")
       .pathinfo(false)
       .libraryTarget("commonjs2")
       .sourceMapFilename("[file].map")
