@@ -2,6 +2,18 @@ import * as creepActions from "../creepActions";
 
 import {log} from "../../../lib/logger/log";
 
+function repairStructure(creep: Creep, structure: Structure) {
+  log.info(`repairer ${creep.name} repairing ${structure.structureType}, ${structure.id}, ${structure.pos}`);
+  creep.memory.structure = structure.id;
+  creepActions.moveToRepair(creep, structure);
+}
+
+function replenishStructure(creep: Creep, structure: Structure) {
+  log.info(`repairer ${creep.name} replenishing ${structure.structureType}, ${structure.id}, ${structure.pos}`);
+  creep.memory.structure = structure.id;
+  creepActions.moveToDropEnergy(creep, structure);
+}
+
 /**
  * Runs repairer actions.
  *
@@ -19,40 +31,61 @@ export function run(creep: Creep): void {
   }
 
   if (creep.memory.repairing) {
-    const structures = creep.room.find<Structure>(FIND_MY_STRUCTURES);
-    let hitStructures = structures.filter((s: Structure) => s.hits < s.hitsMax);
-    if (hitStructures.length) {
-      // Find the closest structure
-      hitStructures = creepActions.sortMostNeedingRepair(hitStructures);
-      const structure = hitStructures[0];
-      log.info(`repairing repairing ${structure.id} ${structure.pos}`);
-      creepActions.moveToRepair(creep, structure);
-    } else {
-      let depletedStructures = structures.filter((s: Structure) => creepActions.structureIsDecaying(s));
-      if (depletedStructures.length) {
-        depletedStructures = creepActions.sortMostNeedingEnergy(depletedStructures);
-        const structure = depletedStructures[0];
-        log.info(`repairer replenishing ${structure.id} ${structure.pos}`);
-        creepActions.moveToDropEnergy(creep, structure);
-      } else {
-        let constructionSites = creep.room.find<ConstructionSite>(FIND_MY_CONSTRUCTION_SITES);
-        if (constructionSites.length) {
-          // Find the closest construction site
-          constructionSites = creepActions.sortClosestConstructionSites(creep, constructionSites);
-          const structure = constructionSites[0];
-          log.info(`repairer moving to construction site ${structure.id} ${structure.pos}`);
-          creepActions.moveToConstructionSite(creep, structure);
+    if (creep.memory.structure) {
+      // Keep repairing the same structure
+      const structures = creep.room.find<Structure>(FIND_MY_STRUCTURES, {
+        filter: (s: Structure) => s.id === creep.memory.structure,
+      });
+      if (structures.length > 0) {
+        const structure = structures[0];
+        if (creepActions.structureIsDecaying(structure)) {
+          replenishStructure(creep, structure);
         } else {
-          let spawns = creep.room.find<Spawn>(FIND_MY_SPAWNS);
-          if (spawns.length) {
-            spawns = creepActions.sortMostNeedingRepair(spawns) as Spawn[];
-            const spawn = spawns[0];
-            log.info(`repairer moving to spawn ${spawn.id} ${spawn.pos}`);
-            creepActions.moveToRepair(creep, spawn);
-          }
+          repairStructure(creep, structure);
         }
+        return;
       }
     }
+
+    // Find something new to repair
+
+    // Find spawns with less than 20% hp remaining
+    const spawns = creep.room.find<Spawn>(FIND_MY_SPAWNS, {
+      filter: (s: Structure) => s.hits < (s.hitsMax * .2),
+    });
+    if (spawns.length) {
+      repairStructure(creep, creepActions.sortMostNeedingRepair(spawns)[0]);
+      return;
+    }
+
+    // Find roads with less than 20% hp remaining
+    const roadStructures = creep.room.find<StructureRoad>(FIND_STRUCTURES, {
+      filter: (s: Structure) => (s.structureType === STRUCTURE_ROAD) && (s.hits < (s.hitsMax * .2)),
+    });
+    if (roadStructures.length > 0) {
+      repairStructure(creep, creepActions.sortMostNeedingRepair(roadStructures)[0]);
+      return;
+    }
+
+    // Find structures with less than 20% hp remaining
+    const hitStructures = creep.room.find<Structure>(FIND_MY_STRUCTURES, {
+      filter: (s: Structure) => (s.hits < s.hitsMax) && (s.hits < (s.hitsMax * .2)),
+    });
+    if (hitStructures.length) {
+      repairStructure(creep, creepActions.sortMostNeedingRepair(hitStructures)[0]);
+      return;
+    }
+
+    // Find decaying structures
+    const decayingStructures = creep.room.find<Structure>(FIND_MY_STRUCTURES, {
+      filter: (s: Structure) => creepActions.structureIsDecaying(s),
+    });
+    if (decayingStructures.length) {
+      replenishStructure(creep, creepActions.sortMostNeedingEnergy(decayingStructures)[0]);
+      return;
+    }
+
+    log.warning(`idle repairer ${creep.name}`);
   } else {
     creepActions.harvestClosestSource(creep);
   }
