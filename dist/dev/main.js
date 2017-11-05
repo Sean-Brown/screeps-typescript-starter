@@ -926,13 +926,15 @@ function run(creep) {
         if (_.sum(creep.carry) > 0) {
             return true;
         }
-        var spawn = creep.pos.findClosestByPath(FIND_MY_SPAWNS);
+        var spawn = creep.pos.findClosestByPath(FIND_MY_SPAWNS, {
+            filter: function (s) { return s.energy > (s.energyCapacity * .2); },
+        });
         if (spawn) {
             creepActions.moveToRenew(creep, spawn);
             return false;
         }
         else {
-            log_1.log.warning("Creep " + creep.name + " requires energy but there is no nearby spawn");
+            log_1.log.warning("Creep " + creep.name + " requires energy but there isn't enough energy at any nearby spawn");
         }
     }
     return true;
