@@ -1,4 +1,5 @@
 import * as creepActions from "../creepActions";
+import * as baseCreep from "./base-creep";
 
 import {log} from "../../../lib/logger/log";
 
@@ -26,6 +27,10 @@ function construct(creep: Creep, site: ConstructionSite) {
  * @param {Creep} creep
  */
 export function run(creep: Creep): void {
+  if (!baseCreep.run(creep)) {
+    return;
+  }
+
   if (creep.memory.repairing && creep.carry.energy === 0) {
     creep.memory.repairing = false;
     creep.say("Harvesting");

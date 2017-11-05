@@ -1,4 +1,5 @@
 import * as creepActions from "../creepActions";
+import * as baseCreep from "./base-creep";
 
 /**
  * Runs builder actions.
@@ -7,6 +8,10 @@ import * as creepActions from "../creepActions";
  * @param {Creep} creep
  */
 export function run(creep: Creep): void {
+  if (!baseCreep.run(creep)) {
+    return;
+  }
+
   if (creep.memory.building && creep.carry.energy === 0) {
     creep.memory.building = false;
     creep.say("Harvesting");
@@ -20,7 +25,7 @@ export function run(creep: Creep): void {
     let targets = creep.room.find<ConstructionSite>(FIND_CONSTRUCTION_SITES);
     if (targets.length) {
       // Find the closest construction site
-      targets = creepActions.sortClosestConstructionSites(creep, targets);
+      targets = creepActions.sortByClosest(creep, targets);
       creepActions.moveToConstructionSite(creep, targets[0]);
     } else {
       let structures = creep.room.find<Structure>(FIND_STRUCTURES);

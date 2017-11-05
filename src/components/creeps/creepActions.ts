@@ -114,16 +114,16 @@ export function harvestClosestSource(creep: Creep) {
 }
 
 /**
- * Sort the construction sites by sites closest to the creep
+ * Sort the objects by the ones closest to the creep
  * @param {Creep} creep
- * @param {ConstructionSite[]} sites
- * @returns {ConstructionSite[]}
+ * @param {T[]} objects
+ * @returns {T[]}
  */
-export function sortClosestConstructionSites(creep: Creep, sites: ConstructionSite[]): ConstructionSite[] {
+export function sortByClosest<T extends Structure | ConstructionSite | Spawn | Container>(creep: Creep, objects: T[]): T[] {
   const creepPos = creep.pos;
-  return sites.sort((siteA, siteB) => {
-    const lenA = creep.room.findPath(creepPos, siteA.pos).length;
-    const lenB = creep.room.findPath(creepPos, siteB.pos).length;
+  return objects.sort((structA, structB) => {
+    const lenA = creep.room.findPath(creepPos, structA.pos).length;
+    const lenB = creep.room.findPath(creepPos, structB.pos).length;
     return lenA > lenB ? 1 : lenA < lenB ? -1 : 0;
   });
 }
@@ -212,11 +212,11 @@ export function moveToHarvest(creep: Creep, target: Source): void {
   }
 }
 
-export function tryEnergyDropOff(creep: Creep, target: Spawn | Structure): number {
+export function tryEnergyDropOff(creep: Creep, target: Spawn | Structure | Container): number {
   return creep.transfer(target, RESOURCE_ENERGY);
 }
 
-export function moveToDropEnergy(creep: Creep, target: Spawn | Structure): void {
+export function moveToDropEnergy(creep: Creep, target: Spawn | Structure | Container): void {
   if (tryEnergyDropOff(creep, target) === ERR_NOT_IN_RANGE) {
     moveTo(creep, target.pos);
   }
@@ -231,6 +231,7 @@ export function moveToRepair(creep: Creep, target: Spawn | Structure): void {
 }
 
 export function moveToConstructionSite(creep: Creep, target: ConstructionSite): void {
+  log.info(`creep ${creep.name} moving to construction site ${target.id}`);
   if (creep.build(target) === ERR_NOT_IN_RANGE) {
     moveTo(creep, target.pos);
   }

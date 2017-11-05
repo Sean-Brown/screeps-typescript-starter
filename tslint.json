@@ -13,6 +13,7 @@
       "check-format",
       "allow-pascal-case",
       "allow-leading-underscore"
-    ]
+    ],
+    "max-line-length": false
   }
 }

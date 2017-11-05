@@ -64,11 +64,202 @@ module.exports =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 23);
+/******/ 	return __webpack_require__(__webpack_require__.s = 24);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var source_map_1 = __webpack_require__(22);
+var Config = __webpack_require__(3);
+var logLevels_1 = __webpack_require__(5);
+var stackLineRe = /([^ ]*) \(([^:]*):([0-9]*):([0-9]*)\)/;
+function resolve(fileLine) {
+    var split = _.trim(fileLine).match(stackLineRe);
+    if (!split || !Log.sourceMap) {
+        return { compiled: fileLine, final: fileLine };
+    }
+    var pos = { column: parseInt(split[4], 10), line: parseInt(split[3], 10) };
+    var original = Log.sourceMap.originalPositionFor(pos);
+    var line = split[1] + " (" + original.source + ":" + original.line + ")";
+    var out = {
+        caller: split[1],
+        compiled: fileLine,
+        final: line,
+        line: original.line,
+        original: line,
+        path: original.source,
+    };
+    return out;
+}
+exports.resolve = resolve;
+function makeVSCLink(pos) {
+    if (!Config.LOG_VSC.valid || !pos.caller || !pos.path || !pos.line || !pos.original) {
+        return pos.final;
+    }
+    return link(vscUrl(pos.path, "L" + pos.line.toString()), pos.original);
+}
+function color(str, color) {
+    return "<font color='" + color + "'>" + str + "</font>";
+}
+function tooltip(str, tooltip) {
+    return "<abbr title='" + tooltip + "'>" + str + "</abbr>";
+}
+function vscUrl(path, line) {
+    return Config.LOG_VSC_URL_TEMPLATE(path, line);
+}
+function link(href, title) {
+    return "<a href='" + href + "' target=\"_blank\">" + title + "</a>";
+}
+function time() {
+    return color(Game.time.toString(), "gray");
+}
+var Log = (function () {
+    function Log() {
+        this._maxFileString = 0;
+        _.defaultsDeep(Memory, { log: {
+                level: Config.LOG_LEVEL,
+                showSource: Config.LOG_PRINT_LINES,
+                showTick: Config.LOG_PRINT_TICK,
+            } });
+    }
+    Log.loadSourceMap = function () {
+        try {
+            var map = __webpack_require__(23);
+            if (map) {
+                Log.sourceMap = new source_map_1.SourceMapConsumer(map);
+            }
+        }
+        catch (err) {
+            console.log("failed to load source map", err);
+        }
+    };
+    Object.defineProperty(Log.prototype, "level", {
+        get: function () { return Memory.log.level; },
+        set: function (value) { Memory.log.level = value; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Log.prototype, "showSource", {
+        get: function () { return Memory.log.showSource; },
+        set: function (value) { Memory.log.showSource = value; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Log.prototype, "showTick", {
+        get: function () { return Memory.log.showTick; },
+        set: function (value) { Memory.log.showTick = value; },
+        enumerable: true,
+        configurable: true
+    });
+    Log.prototype.trace = function (error) {
+        if (this.level >= logLevels_1.LogLevels.ERROR && error.stack) {
+            console.log(this.resolveStack(error.stack));
+        }
+        return this;
+    };
+    Log.prototype.error = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        if (this.level >= logLevels_1.LogLevels.ERROR) {
+            console.log.apply(this, this.buildArguments(logLevels_1.LogLevels.ERROR).concat([].slice.call(args)));
+        }
+    };
+    Log.prototype.warning = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        if (this.level >= logLevels_1.LogLevels.WARNING) {
+            console.log.apply(this, this.buildArguments(logLevels_1.LogLevels.WARNING).concat([].slice.call(args)));
+        }
+    };
+    Log.prototype.info = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        if (this.level >= logLevels_1.LogLevels.INFO) {
+            console.log.apply(this, this.buildArguments(logLevels_1.LogLevels.INFO).concat([].slice.call(args)));
+        }
+    };
+    Log.prototype.debug = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        if (this.level >= logLevels_1.LogLevels.DEBUG) {
+            console.log.apply(this, this.buildArguments(logLevels_1.LogLevels.DEBUG).concat([].slice.call(args)));
+        }
+    };
+    Log.prototype.getFileLine = function (upStack) {
+        if (upStack === void 0) { upStack = 4; }
+        var stack = new Error("").stack;
+        if (stack) {
+            var lines = stack.split("\n");
+            if (lines.length > upStack) {
+                var originalLines = _.drop(lines, upStack).map(resolve);
+                var hoverText = _.map(originalLines, "final").join("&#10;");
+                return this.adjustFileLine(originalLines[0].final, tooltip(makeVSCLink(originalLines[0]), hoverText));
+            }
+        }
+        return "";
+    };
+    Log.prototype.buildArguments = function (level) {
+        var out = [];
+        switch (level) {
+            case logLevels_1.LogLevels.ERROR:
+                out.push(color("ERROR  ", "red"));
+                break;
+            case logLevels_1.LogLevels.WARNING:
+                out.push(color("WARNING", "yellow"));
+                break;
+            case logLevels_1.LogLevels.INFO:
+                out.push(color("INFO   ", "green"));
+                break;
+            case logLevels_1.LogLevels.DEBUG:
+                out.push(color("DEBUG  ", "gray"));
+                break;
+            default:
+                break;
+        }
+        if (this.showTick) {
+            out.push(time());
+        }
+        if (this.showSource) {
+            out.push(this.getFileLine());
+        }
+        return out;
+    };
+    Log.prototype.resolveStack = function (stack) {
+        if (!Log.sourceMap) {
+            return stack;
+        }
+        return _.map(stack.split("\n").map(resolve), "final").join("\n");
+    };
+    Log.prototype.adjustFileLine = function (visibleText, line) {
+        var newPad = Math.max(visibleText.length, this._maxFileString);
+        this._maxFileString = Math.min(newPad, Config.LOG_MAX_PAD);
+        return "|" + _.padRight(line, line.length + this._maxFileString - visibleText.length, " ") + "|";
+    };
+    return Log;
+}());
+exports.Log = Log;
+if (Config.LOG_LOAD_SOURCE_MAP) {
+    Log.loadSourceMap();
+}
+exports.log = new Log();
+global.log = exports.log;
+
+
+/***/ }),
+/* 1 */
 /***/ (function(module, exports) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -491,227 +682,14 @@ exports.compareByGeneratedPositionsInflated = compareByGeneratedPositionsInflate
 
 
 /***/ }),
-/* 1 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var source_map_1 = __webpack_require__(21);
-var Config = __webpack_require__(2);
-var logLevels_1 = __webpack_require__(4);
-var stackLineRe = /([^ ]*) \(([^:]*):([0-9]*):([0-9]*)\)/;
-function resolve(fileLine) {
-    var split = _.trim(fileLine).match(stackLineRe);
-    if (!split || !Log.sourceMap) {
-        return { compiled: fileLine, final: fileLine };
-    }
-    var pos = { column: parseInt(split[4], 10), line: parseInt(split[3], 10) };
-    var original = Log.sourceMap.originalPositionFor(pos);
-    var line = split[1] + " (" + original.source + ":" + original.line + ")";
-    var out = {
-        caller: split[1],
-        compiled: fileLine,
-        final: line,
-        line: original.line,
-        original: line,
-        path: original.source,
-    };
-    return out;
-}
-exports.resolve = resolve;
-function makeVSCLink(pos) {
-    if (!Config.LOG_VSC.valid || !pos.caller || !pos.path || !pos.line || !pos.original) {
-        return pos.final;
-    }
-    return link(vscUrl(pos.path, "L" + pos.line.toString()), pos.original);
-}
-function color(str, color) {
-    return "<font color='" + color + "'>" + str + "</font>";
-}
-function tooltip(str, tooltip) {
-    return "<abbr title='" + tooltip + "'>" + str + "</abbr>";
-}
-function vscUrl(path, line) {
-    return Config.LOG_VSC_URL_TEMPLATE(path, line);
-}
-function link(href, title) {
-    return "<a href='" + href + "' target=\"_blank\">" + title + "</a>";
-}
-function time() {
-    return color(Game.time.toString(), "gray");
-}
-var Log = (function () {
-    function Log() {
-        this._maxFileString = 0;
-        _.defaultsDeep(Memory, { log: {
-                level: Config.LOG_LEVEL,
-                showSource: Config.LOG_PRINT_LINES,
-                showTick: Config.LOG_PRINT_TICK,
-            } });
-    }
-    Log.loadSourceMap = function () {
-        try {
-            var map = __webpack_require__(22);
-            if (map) {
-                Log.sourceMap = new source_map_1.SourceMapConsumer(map);
-            }
-        }
-        catch (err) {
-            console.log("failed to load source map", err);
-        }
-    };
-    Object.defineProperty(Log.prototype, "level", {
-        get: function () { return Memory.log.level; },
-        set: function (value) { Memory.log.level = value; },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Log.prototype, "showSource", {
-        get: function () { return Memory.log.showSource; },
-        set: function (value) { Memory.log.showSource = value; },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Log.prototype, "showTick", {
-        get: function () { return Memory.log.showTick; },
-        set: function (value) { Memory.log.showTick = value; },
-        enumerable: true,
-        configurable: true
-    });
-    Log.prototype.trace = function (error) {
-        if (this.level >= logLevels_1.LogLevels.ERROR && error.stack) {
-            console.log(this.resolveStack(error.stack));
-        }
-        return this;
-    };
-    Log.prototype.error = function () {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i] = arguments[_i];
-        }
-        if (this.level >= logLevels_1.LogLevels.ERROR) {
-            console.log.apply(this, this.buildArguments(logLevels_1.LogLevels.ERROR).concat([].slice.call(args)));
-        }
-    };
-    Log.prototype.warning = function () {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i] = arguments[_i];
-        }
-        if (this.level >= logLevels_1.LogLevels.WARNING) {
-            console.log.apply(this, this.buildArguments(logLevels_1.LogLevels.WARNING).concat([].slice.call(args)));
-        }
-    };
-    Log.prototype.info = function () {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i] = arguments[_i];
-        }
-        if (this.level >= logLevels_1.LogLevels.INFO) {
-            console.log.apply(this, this.buildArguments(logLevels_1.LogLevels.INFO).concat([].slice.call(args)));
-        }
-    };
-    Log.prototype.debug = function () {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i] = arguments[_i];
-        }
-        if (this.level >= logLevels_1.LogLevels.DEBUG) {
-            console.log.apply(this, this.buildArguments(logLevels_1.LogLevels.DEBUG).concat([].slice.call(args)));
-        }
-    };
-    Log.prototype.getFileLine = function (upStack) {
-        if (upStack === void 0) { upStack = 4; }
-        var stack = new Error("").stack;
-        if (stack) {
-            var lines = stack.split("\n");
-            if (lines.length > upStack) {
-                var originalLines = _.drop(lines, upStack).map(resolve);
-                var hoverText = _.map(originalLines, "final").join("&#10;");
-                return this.adjustFileLine(originalLines[0].final, tooltip(makeVSCLink(originalLines[0]), hoverText));
-            }
-        }
-        return "";
-    };
-    Log.prototype.buildArguments = function (level) {
-        var out = [];
-        switch (level) {
-            case logLevels_1.LogLevels.ERROR:
-                out.push(color("ERROR  ", "red"));
-                break;
-            case logLevels_1.LogLevels.WARNING:
-                out.push(color("WARNING", "yellow"));
-                break;
-            case logLevels_1.LogLevels.INFO:
-                out.push(color("INFO   ", "green"));
-                break;
-            case logLevels_1.LogLevels.DEBUG:
-                out.push(color("DEBUG  ", "gray"));
-                break;
-            default:
-                break;
-        }
-        if (this.showTick) {
-            out.push(time());
-        }
-        if (this.showSource) {
-            out.push(this.getFileLine());
-        }
-        return out;
-    };
-    Log.prototype.resolveStack = function (stack) {
-        if (!Log.sourceMap) {
-            return stack;
-        }
-        return _.map(stack.split("\n").map(resolve), "final").join("\n");
-    };
-    Log.prototype.adjustFileLine = function (visibleText, line) {
-        var newPad = Math.max(visibleText.length, this._maxFileString);
-        this._maxFileString = Math.min(newPad, Config.LOG_MAX_PAD);
-        return "|" + _.padRight(line, line.length + this._maxFileString - visibleText.length, " ") + "|";
-    };
-    return Log;
-}());
-exports.Log = Log;
-if (Config.LOG_LOAD_SOURCE_MAP) {
-    Log.loadSourceMap();
-}
-exports.log = new Log();
-global.log = exports.log;
-
-
-/***/ }),
 /* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var logLevels_1 = __webpack_require__(4);
-exports.ENABLE_DEBUG_MODE = true;
-exports.USE_PROFILER = true;
-exports.DEFAULT_MIN_LIFE_BEFORE_NEEDS_REFILL = 700;
-exports.LOG_LEVEL = logLevels_1.LogLevels.DEBUG;
-exports.LOG_PRINT_TICK = true;
-exports.LOG_PRINT_LINES = true;
-exports.LOG_LOAD_SOURCE_MAP = true;
-exports.LOG_MAX_PAD = 100;
-exports.LOG_VSC = { repo: "@@_repo_@@", revision: "", valid: false };
-exports.LOG_VSC_URL_TEMPLATE = function (path, line) {
-    return exports.LOG_VSC.repo + "/blob/" + exports.LOG_VSC.revision + "/" + path + "#" + line;
-};
-
-
-/***/ }),
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var Config = __webpack_require__(2);
-var log_1 = __webpack_require__(1);
+var Config = __webpack_require__(3);
+var log_1 = __webpack_require__(0);
 function moveTo(creep, target) {
     return creep.moveTo(target);
 }
@@ -771,15 +749,15 @@ function harvestClosestSource(creep) {
     }
 }
 exports.harvestClosestSource = harvestClosestSource;
-function sortClosestConstructionSites(creep, sites) {
+function sortByClosest(creep, objects) {
     var creepPos = creep.pos;
-    return sites.sort(function (siteA, siteB) {
-        var lenA = creep.room.findPath(creepPos, siteA.pos).length;
-        var lenB = creep.room.findPath(creepPos, siteB.pos).length;
+    return objects.sort(function (structA, structB) {
+        var lenA = creep.room.findPath(creepPos, structA.pos).length;
+        var lenB = creep.room.findPath(creepPos, structB.pos).length;
         return lenA > lenB ? 1 : lenA < lenB ? -1 : 0;
     });
 }
-exports.sortClosestConstructionSites = sortClosestConstructionSites;
+exports.sortByClosest = sortByClosest;
 function sortMostNeedingRepair(structures) {
     return structures.sort(function (sA, sB) {
         var sAdeficit = sA.hitsMax - sA.hits;
@@ -876,6 +854,7 @@ function moveToRepair(creep, target) {
 }
 exports.moveToRepair = moveToRepair;
 function moveToConstructionSite(creep, target) {
+    log_1.log.info("creep " + creep.name + " moving to construction site " + target.id);
     if (creep.build(target) === ERR_NOT_IN_RANGE) {
         moveTo(creep, target.pos);
     }
@@ -912,7 +891,54 @@ exports.structureIsDecaying = structureIsDecaying;
 
 
 /***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var logLevels_1 = __webpack_require__(5);
+exports.ENABLE_DEBUG_MODE = true;
+exports.USE_PROFILER = true;
+exports.DEFAULT_MIN_LIFE_BEFORE_NEEDS_REFILL = 700;
+exports.LOG_LEVEL = logLevels_1.LogLevels.DEBUG;
+exports.LOG_PRINT_TICK = true;
+exports.LOG_PRINT_LINES = true;
+exports.LOG_LOAD_SOURCE_MAP = true;
+exports.LOG_MAX_PAD = 100;
+exports.LOG_VSC = { repo: "@@_repo_@@", revision: "", valid: false };
+exports.LOG_VSC_URL_TEMPLATE = function (path, line) {
+    return exports.LOG_VSC.repo + "/blob/" + exports.LOG_VSC.revision + "/" + path + "#" + line;
+};
+
+
+/***/ }),
 /* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var creepActions = __webpack_require__(2);
+var log_1 = __webpack_require__(0);
+function run(creep) {
+    if (creepActions.needsRenew(creep)) {
+        var spawn = creep.pos.findClosestByPath(FIND_MY_SPAWNS);
+        if (spawn) {
+            creepActions.moveToRenew(creep, spawn);
+            return false;
+        }
+        else {
+            log_1.log.warning("Creep " + creep.name + " requires energy but there is no nearby spawn");
+        }
+    }
+    return true;
+}
+exports.run = run;
+
+
+/***/ }),
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -928,7 +954,7 @@ var LogLevels;
 
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -938,7 +964,7 @@ var LogLevels;
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-var util = __webpack_require__(0);
+var util = __webpack_require__(1);
 var has = Object.prototype.hasOwnProperty;
 var hasNativeMap = typeof Map !== "undefined";
 
@@ -1055,7 +1081,7 @@ exports.ArraySet = ArraySet;
 
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -1095,7 +1121,7 @@ exports.ArraySet = ArraySet;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-var base64 = __webpack_require__(15);
+var base64 = __webpack_require__(16);
 
 // A single base 64 digit can contain 6 bits of data. For the base 64 variable
 // length quantities we use in the source map spec, the first bit is the sign,
@@ -1201,7 +1227,7 @@ exports.decode = function base64VLQ_decode(aStr, aIndex, aOutParam) {
 
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -1211,10 +1237,10 @@ exports.decode = function base64VLQ_decode(aStr, aIndex, aOutParam) {
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-var base64VLQ = __webpack_require__(6);
-var util = __webpack_require__(0);
-var ArraySet = __webpack_require__(5).ArraySet;
-var MappingList = __webpack_require__(17).MappingList;
+var base64VLQ = __webpack_require__(7);
+var util = __webpack_require__(1);
+var ArraySet = __webpack_require__(6).ArraySet;
+var MappingList = __webpack_require__(18).MappingList;
 
 /**
  * An instance of the SourceMapGenerator represents a source map which is
@@ -1623,16 +1649,16 @@ exports.SourceMapGenerator = SourceMapGenerator;
 
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var CreepManager = __webpack_require__(9);
-var Config = __webpack_require__(2);
-var Profiler = __webpack_require__(14);
-var log_1 = __webpack_require__(1);
+var CreepManager = __webpack_require__(10);
+var Config = __webpack_require__(3);
+var Profiler = __webpack_require__(15);
+var log_1 = __webpack_require__(0);
 if (Config.USE_PROFILER) {
     Profiler.enable();
 }
@@ -1662,18 +1688,18 @@ exports.loop = !Config.USE_PROFILER ? mloop : function () { Profiler.wrap(mloop)
 
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Config = __webpack_require__(2);
-var builder = __webpack_require__(11);
-var harvester = __webpack_require__(12);
-var repairer = __webpack_require__(13);
-var roles_1 = __webpack_require__(10);
-var log_1 = __webpack_require__(1);
+var Config = __webpack_require__(3);
+var builder = __webpack_require__(12);
+var harvester = __webpack_require__(13);
+var repairer = __webpack_require__(14);
+var roles_1 = __webpack_require__(11);
+var log_1 = __webpack_require__(0);
 function run(room) {
     var creeps = room.find(FIND_MY_CREEPS);
     var creepCount = _.size(creeps);
@@ -1762,7 +1788,7 @@ function _spawnCreep(spawn, bodyParts, role) {
 
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1801,14 +1827,18 @@ exports.Roles = new CreepRoles();
 
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var creepActions = __webpack_require__(3);
+var creepActions = __webpack_require__(2);
+var baseCreep = __webpack_require__(4);
 function run(creep) {
+    if (!baseCreep.run(creep)) {
+        return;
+    }
     if (creep.memory.building && creep.carry.energy === 0) {
         creep.memory.building = false;
         creep.say("Harvesting");
@@ -1820,7 +1850,7 @@ function run(creep) {
     if (creep.memory.building) {
         var targets = creep.room.find(FIND_CONSTRUCTION_SITES);
         if (targets.length) {
-            targets = creepActions.sortClosestConstructionSites(creep, targets);
+            targets = creepActions.sortByClosest(creep, targets);
             creepActions.moveToConstructionSite(creep, targets[0]);
         }
         else {
@@ -1839,62 +1869,67 @@ exports.run = run;
 
 
 /***/ }),
-/* 12 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var creepActions = __webpack_require__(3);
-function run(creep) {
-    var spawns = creep.room.find(FIND_MY_SPAWNS);
-    if (spawns.length) {
-        var spawn = spawns[0];
-        if (creepActions.needsRenew(creep)) {
-            creepActions.moveToRenew(creep, spawn);
-        }
-        else if (_.sum(creep.carry) === creep.carryCapacity) {
-            if (spawn.energy < spawn.energyCapacity) {
-                creepActions.moveToDropEnergy(creep, spawn);
-            }
-            else {
-                checkStructures(creep);
-            }
-        }
-        else {
-            creepActions.harvestClosestSource(creep);
-        }
-    }
-    else {
-        creepActions.harvestClosestSource(creep);
-    }
-}
-exports.run = run;
-function checkStructures(creep) {
-    var structures = creep.room.find(FIND_MY_STRUCTURES);
-    if (structures.length) {
-        structures = creepActions.sortMostNeedingEnergy(structures);
-        creepActions.moveToDropEnergy(creep, structures[0]);
-    }
-    else {
-        var constructionSites = creep.room.find(FIND_MY_CONSTRUCTION_SITES);
-        if (constructionSites.length) {
-            constructionSites = creepActions.sortClosestConstructionSites(creep, constructionSites);
-            creepActions.moveToConstructionSite(creep, constructionSites[0]);
-        }
-    }
-}
-
-
-/***/ }),
 /* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var creepActions = __webpack_require__(3);
-var log_1 = __webpack_require__(1);
+var creepActions = __webpack_require__(2);
+var baseCreep = __webpack_require__(4);
+var log_1 = __webpack_require__(0);
+function run(creep) {
+    if (!baseCreep.run(creep)) {
+        return;
+    }
+    if (_.sum(creep.carry) < creep.carryCapacity) {
+        creepActions.harvestClosestSource(creep);
+        return;
+    }
+    var spawns = creep.room.find(FIND_MY_SPAWNS, {
+        filter: function (s) { return s.energy < s.energyCapacity; },
+    });
+    if (spawns.length) {
+        var spawn = creepActions.sortByClosest(creep, spawns)[0];
+        console.info("creep " + creep.name + " moving energy to spawn " + spawn.name);
+        creepActions.moveToDropEnergy(creep, spawn);
+        return;
+    }
+    var containers = creep.room.find(FIND_MY_STRUCTURES, {
+        filter: function (s) { return s && s.store < s.storeCapacity; },
+    });
+    if (containers.length) {
+        var container = creepActions.sortByClosest(creep, containers)[0];
+        console.info("creep " + creep.name + " moving energy to container " + container.id);
+        creepActions.moveToDropEnergy(creep, container);
+        return;
+    }
+    if (!checkSites(creep)) {
+        return;
+    }
+    log_1.log.warning("idle harvester " + creep.name);
+}
+exports.run = run;
+function checkSites(creep) {
+    var site = creep.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES);
+    if (site) {
+        creepActions.moveToConstructionSite(creep, site);
+        return false;
+    }
+    return true;
+}
+
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var creepActions = __webpack_require__(2);
+var baseCreep = __webpack_require__(4);
+var log_1 = __webpack_require__(0);
 function repairStructure(creep, structure) {
     log_1.log.info("repairer " + creep.name + " repairing " + structure.structureType + ", " + structure.id + ", " + structure.pos);
     creep.memory.structure = structure.id;
@@ -1910,6 +1945,9 @@ function construct(creep, site) {
     creepActions.moveToConstructionSite(creep, site);
 }
 function run(creep) {
+    if (!baseCreep.run(creep)) {
+        return;
+    }
     if (creep.memory.repairing && creep.carry.energy === 0) {
         creep.memory.repairing = false;
         creep.say("Harvesting");
@@ -1982,7 +2020,7 @@ exports.run = run;
 
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports) {
 
 let usedOnStart = 0;
@@ -2312,7 +2350,7 @@ module.exports = {
 
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -2385,7 +2423,7 @@ exports.decode = function (charCode) {
 
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -2502,7 +2540,7 @@ exports.search = function search(aNeedle, aHaystack, aCompare, aBias) {
 
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -2512,7 +2550,7 @@ exports.search = function search(aNeedle, aHaystack, aCompare, aBias) {
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-var util = __webpack_require__(0);
+var util = __webpack_require__(1);
 
 /**
  * Determine whether mappingB is after mappingA with respect to generated
@@ -2587,7 +2625,7 @@ exports.MappingList = MappingList;
 
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -2707,7 +2745,7 @@ exports.quickSort = function (ary, comparator) {
 
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -2717,11 +2755,11 @@ exports.quickSort = function (ary, comparator) {
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-var util = __webpack_require__(0);
-var binarySearch = __webpack_require__(16);
-var ArraySet = __webpack_require__(5).ArraySet;
-var base64VLQ = __webpack_require__(6);
-var quickSort = __webpack_require__(18).quickSort;
+var util = __webpack_require__(1);
+var binarySearch = __webpack_require__(17);
+var ArraySet = __webpack_require__(6).ArraySet;
+var base64VLQ = __webpack_require__(7);
+var quickSort = __webpack_require__(19).quickSort;
 
 function SourceMapConsumer(aSourceMap) {
   var sourceMap = aSourceMap;
@@ -3795,7 +3833,7 @@ exports.IndexedSourceMapConsumer = IndexedSourceMapConsumer;
 
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -3805,8 +3843,8 @@ exports.IndexedSourceMapConsumer = IndexedSourceMapConsumer;
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-var SourceMapGenerator = __webpack_require__(7).SourceMapGenerator;
-var util = __webpack_require__(0);
+var SourceMapGenerator = __webpack_require__(8).SourceMapGenerator;
+var util = __webpack_require__(1);
 
 // Matches a Windows-style `\r\n` newline or a `\n` newline used by all other
 // operating systems these days (capturing the result).
@@ -4214,7 +4252,7 @@ exports.SourceNode = SourceNode;
 
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -4222,22 +4260,22 @@ exports.SourceNode = SourceNode;
  * Licensed under the New BSD license. See LICENSE.txt or:
  * http://opensource.org/licenses/BSD-3-Clause
  */
-exports.SourceMapGenerator = __webpack_require__(7).SourceMapGenerator;
-exports.SourceMapConsumer = __webpack_require__(19).SourceMapConsumer;
-exports.SourceNode = __webpack_require__(20).SourceNode;
+exports.SourceMapGenerator = __webpack_require__(8).SourceMapGenerator;
+exports.SourceMapConsumer = __webpack_require__(20).SourceMapConsumer;
+exports.SourceNode = __webpack_require__(21).SourceNode;
 
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports) {
 
 module.exports = require("main.js.map");
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(8);
+module.exports = __webpack_require__(9);
 
 
 /***/ })
