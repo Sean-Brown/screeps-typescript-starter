@@ -1671,9 +1671,9 @@ var log_1 = __webpack_require__(0);
 if (Config.USE_PROFILER) {
     Profiler.enable();
 }
-log_1.log.info("Scripts bootstrapped");
+log_1.log.debug("Scripts bootstrapped");
 if (false) {
-    log_1.log.info("Revision ID: " + __REVISION__);
+    log_1.log.debug("Revision ID: " + __REVISION__);
 }
 function mloop() {
     if (!Memory.uuid || Memory.uuid > 100) {
@@ -1714,7 +1714,7 @@ function run(room) {
     var creeps = room.find(FIND_MY_CREEPS);
     var creepCount = _.size(creeps);
     if (Config.ENABLE_DEBUG_MODE) {
-        log_1.log.info(creepCount + " creeps found in the playground.");
+        log_1.log.debug(creepCount + " creeps found in the playground.");
     }
     _buildMissingCreeps(room, creeps);
     _.each(creeps, function (creep) {
@@ -1742,7 +1742,7 @@ function _buildMissingCreeps(room, creeps) {
     });
     if (Config.ENABLE_DEBUG_MODE) {
         if (spawns[0]) {
-            log_1.log.info("Spawn: " + spawns[0].name);
+            log_1.log.debug("Spawn: " + spawns[0].name);
         }
     }
     if (!creeps.some(function (creep) { return creepActions.needsRenew(creep); })) {
@@ -1783,16 +1783,16 @@ function _spawnCreep(spawn, bodyParts, role) {
     if (status === OK) {
         Memory.uuid = uuid + 1;
         var creepName = spawn.room.name + " - " + role + " " + uuid;
-        log_1.log.info("Started creating new creep: " + creepName);
+        log_1.log.debug("Started creating new creep: " + creepName);
         if (Config.ENABLE_DEBUG_MODE) {
-            log_1.log.info("Body: " + bodyParts);
+            log_1.log.debug("Body: " + bodyParts);
         }
         status = spawn.createCreep(bodyParts, creepName, properties);
         return _.isString(status) ? OK : status;
     }
     else {
         if (Config.ENABLE_DEBUG_MODE) {
-            log_1.log.info("Failed creating new creep: " + status);
+            log_1.log.debug("Failed creating new creep: " + status);
         }
         return status;
     }

@@ -18,9 +18,9 @@ if (Config.USE_PROFILER) {
   Profiler.enable();
 }
 
-log.info(`Scripts bootstrapped`);
+log.debug(`Scripts bootstrapped`);
 if (__REVISION__) {
-  log.info(`Revision ID: ${__REVISION__}`);
+  log.debug(`Revision ID: ${__REVISION__}`);
 }
 
 function mloop() {

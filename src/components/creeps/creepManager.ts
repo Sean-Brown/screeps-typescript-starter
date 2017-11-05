@@ -20,7 +20,7 @@ export function run(room: Room): void {
   const creepCount = _.size(creeps);
 
   if (Config.ENABLE_DEBUG_MODE) {
-    log.info(`${creepCount} creeps found in the playground.`);
+    log.debug(`${creepCount} creeps found in the playground.`);
   }
 
   _buildMissingCreeps(room, creeps);
@@ -57,7 +57,7 @@ function _buildMissingCreeps(room: Room, creeps: Creep[]) {
 
   if (Config.ENABLE_DEBUG_MODE) {
     if (spawns[0]) {
-      log.info(`Spawn: ${spawns[0].name}`);
+      log.debug(`Spawn: ${spawns[0].name}`);
     }
   }
 
@@ -120,9 +120,9 @@ function _spawnCreep(spawn: Spawn, bodyParts: string[], role: string) {
     Memory.uuid = uuid + 1;
     const creepName: string = `${spawn.room.name} - ${role} ${uuid}`;
 
-    log.info(`Started creating new creep: ${creepName}`);
+    log.debug(`Started creating new creep: ${creepName}`);
     if (Config.ENABLE_DEBUG_MODE) {
-      log.info(`Body: ${bodyParts}`);
+      log.debug(`Body: ${bodyParts}`);
     }
 
     status = spawn.createCreep(bodyParts, creepName, properties);
@@ -130,7 +130,7 @@ function _spawnCreep(spawn: Spawn, bodyParts: string[], role: string) {
     return _.isString(status) ? OK : status;
   } else {
     if (Config.ENABLE_DEBUG_MODE) {
-      log.info(`Failed creating new creep: ${status}`);
+      log.debug(`Failed creating new creep: ${status}`);
     }
 
     return status;
