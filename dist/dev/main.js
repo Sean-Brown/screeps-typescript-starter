@@ -422,7 +422,7 @@ function moveToDropEnergy(creep, target) {
         moveTo(creep, target.pos);
     }
     else if (errCode !== OK) {
-        console.error("creep " + creep.name + " received error " + errCode + " attempting to drop off energy at " + target.pos);
+        log_1.log.error("creep " + creep.name + " received error " + errCode + " attempting to drop off energy at " + target.pos);
     }
 }
 exports.moveToDropEnergy = moveToDropEnergy;
