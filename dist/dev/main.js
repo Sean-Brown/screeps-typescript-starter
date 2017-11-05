@@ -260,6 +260,215 @@ global.log = exports.log;
 
 /***/ }),
 /* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Config = __webpack_require__(3);
+var log_1 = __webpack_require__(0);
+function moveTo(creep, target) {
+    return creep.moveTo(target);
+}
+exports.moveTo = moveTo;
+function needsRenew(creep) {
+    return (creep.ticksToLive < Config.DEFAULT_MIN_LIFE_BEFORE_NEEDS_REFILL);
+}
+exports.needsRenew = needsRenew;
+function tryRenew(creep, spawn) {
+    return spawn.renewCreep(creep);
+}
+exports.tryRenew = tryRenew;
+function moveToRenew(creep, spawn) {
+    if (tryRenew(creep, spawn) === ERR_NOT_IN_RANGE) {
+        moveTo(creep, spawn);
+    }
+}
+exports.moveToRenew = moveToRenew;
+function getEnergy(creep, roomObject) {
+    var energy = roomObject;
+    if (energy) {
+        if (creep.pos.isNearTo(energy)) {
+            creep.pickup(energy);
+        }
+        else {
+            moveTo(creep, energy.pos);
+        }
+    }
+}
+exports.getEnergy = getEnergy;
+function canWork(creep) {
+    var working = creep.memory.working;
+    if (working && _.sum(creep.carry) === 0) {
+        creep.memory.working = false;
+        return false;
+    }
+    else if (!working && _.sum(creep.carry) === creep.carryCapacity) {
+        creep.memory.working = true;
+        return true;
+    }
+    else {
+        return creep.memory.working;
+    }
+}
+exports.canWork = canWork;
+function creepBuildCost(bodyParts) {
+    return bodyParts.reduce(function (cost, part) { return cost + BODYPART_COST[part]; }, 0);
+}
+exports.creepBuildCost = creepBuildCost;
+function harvestClosestSource(creep) {
+    var sources = creep.room.find(FIND_SOURCES);
+    if (sources.length) {
+        sources = sortClosestEnergySources(creep, sources);
+        var source = sources[0];
+        log_1.log.debug("harvester " + creep.name + " harvesting from " + source.id + ", " + source.pos);
+        moveToHarvest(creep, source);
+    }
+}
+exports.harvestClosestSource = harvestClosestSource;
+function sortByClosest(creep, objects) {
+    var creepPos = creep.pos;
+    return objects.sort(function (structA, structB) {
+        var lenA = creep.room.findPath(creepPos, structA.pos).length;
+        var lenB = creep.room.findPath(creepPos, structB.pos).length;
+        return lenA > lenB ? 1 : lenA < lenB ? -1 : 0;
+    });
+}
+exports.sortByClosest = sortByClosest;
+function sortMostNeedingRepair(structures) {
+    return structures.sort(function (sA, sB) {
+        var sAdeficit = sA.hitsMax - sA.hits;
+        var sBdeficit = sB.hitsMax - sB.hits;
+        return sAdeficit > sBdeficit ? 1 : sAdeficit < sBdeficit ? -1 : 0;
+    });
+}
+exports.sortMostNeedingRepair = sortMostNeedingRepair;
+function hasDecay(item) {
+    return item.structureType === STRUCTURE_RAMPART ||
+        item.structureType === STRUCTURE_ROAD ||
+        item.structureType === STRUCTURE_POWER_BANK ||
+        item.structureType === STRUCTURE_CONTAINER ||
+        item.structureType === STRUCTURE_PORTAL;
+}
+function isController(item) {
+    return item.structureType === STRUCTURE_CONTROLLER;
+}
+function sortMostNeedingEnergy(structures) {
+    return structures.sort(function (sA, sB) {
+        var aIsController = isController(sA);
+        var bIsController = isController(sB);
+        var aHasDecay = hasDecay(sA);
+        var bHasDecay = hasDecay(sB);
+        var chooseA = (aIsController || aHasDecay);
+        var chooseB = (bIsController || bHasDecay);
+        if (chooseA && !chooseB) {
+            return 1;
+        }
+        else if (chooseB && !chooseA) {
+            return -1;
+        }
+        else if (chooseA && chooseB) {
+            if (aIsController && bIsController) {
+                var aController = sA;
+                var aTicks = aController ? aController.ticksToDowngrade : 0;
+                var bController = sB;
+                var bTicks = bController ? bController.ticksToDowngrade : 0;
+                return aTicks < bTicks ? 1 : bTicks > aTicks ? -1 : 0;
+            }
+            else if (aIsController && !bIsController) {
+                return 1;
+            }
+            else if (bIsController && !aIsController) {
+                return -1;
+            }
+            else {
+                var aTicks = getStructureTicksToDecay(sA);
+                var bTicks = getStructureTicksToDecay(sB);
+                return aTicks < bTicks ? 1 : bTicks < aTicks ? -1 : 0;
+            }
+        }
+        else {
+            return 0;
+        }
+    });
+}
+exports.sortMostNeedingEnergy = sortMostNeedingEnergy;
+function sortClosestEnergySources(creep, energySources) {
+    var creepPos = creep.pos;
+    return energySources.sort(function (sourceA, sourceB) {
+        var lenA = creep.room.findPath(creepPos, sourceA.pos).length;
+        var lenB = creep.room.findPath(creepPos, sourceB.pos).length;
+        return lenA > lenB ? 1 : lenA < lenB ? -1 : 0;
+    });
+}
+exports.sortClosestEnergySources = sortClosestEnergySources;
+function tryHarvest(creep, target) {
+    return creep.harvest(target);
+}
+exports.tryHarvest = tryHarvest;
+function moveToHarvest(creep, target) {
+    if (tryHarvest(creep, target) === ERR_NOT_IN_RANGE) {
+        moveTo(creep, target.pos);
+    }
+}
+exports.moveToHarvest = moveToHarvest;
+function tryEnergyDropOff(creep, target) {
+    return creep.transfer(target, RESOURCE_ENERGY);
+}
+exports.tryEnergyDropOff = tryEnergyDropOff;
+function moveToDropEnergy(creep, target) {
+    if (tryEnergyDropOff(creep, target) === ERR_NOT_IN_RANGE) {
+        moveTo(creep, target.pos);
+    }
+}
+exports.moveToDropEnergy = moveToDropEnergy;
+function moveToRepair(creep, target) {
+    log_1.log.info("harveseter " + creep.name + " moving to repair target " + target.id +
+        (", " + target.pos + ", " + target.hits + " of " + target.hitsMax));
+    if (creep.repair(target) === ERR_NOT_IN_RANGE) {
+        moveTo(creep, target.pos);
+    }
+}
+exports.moveToRepair = moveToRepair;
+function moveToConstructionSite(creep, target) {
+    log_1.log.info("creep " + creep.name + " moving to construction site " + target.id);
+    if (creep.build(target) === ERR_NOT_IN_RANGE) {
+        moveTo(creep, target.pos);
+    }
+}
+exports.moveToConstructionSite = moveToConstructionSite;
+function getStructureTicksToDecay(structure) {
+    var rampart = structure;
+    if (rampart) {
+        return rampart.ticksToDecay;
+    }
+    var road = structure;
+    if (road) {
+        return road.ticksToDecay;
+    }
+    var powerBank = structure;
+    if (powerBank) {
+        return powerBank.ticksToDecay;
+    }
+    var container = structure;
+    if (container) {
+        return container.ticksToDecay;
+    }
+    var portal = structure;
+    if (portal) {
+        return portal.ticksToDecay;
+    }
+    return -1;
+}
+function structureIsDecaying(structure) {
+    var ticksToDecay = getStructureTicksToDecay(structure);
+    return ticksToDecay > -1 && ticksToDecay < 300;
+}
+exports.structureIsDecaying = structureIsDecaying;
+
+
+/***/ }),
+/* 2 */
 /***/ (function(module, exports) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -682,215 +891,6 @@ exports.compareByGeneratedPositionsInflated = compareByGeneratedPositionsInflate
 
 
 /***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var Config = __webpack_require__(3);
-var log_1 = __webpack_require__(0);
-function moveTo(creep, target) {
-    return creep.moveTo(target);
-}
-exports.moveTo = moveTo;
-function needsRenew(creep) {
-    return (creep.ticksToLive < Config.DEFAULT_MIN_LIFE_BEFORE_NEEDS_REFILL);
-}
-exports.needsRenew = needsRenew;
-function tryRenew(creep, spawn) {
-    return spawn.renewCreep(creep);
-}
-exports.tryRenew = tryRenew;
-function moveToRenew(creep, spawn) {
-    if (tryRenew(creep, spawn) === ERR_NOT_IN_RANGE) {
-        moveTo(creep, spawn);
-    }
-}
-exports.moveToRenew = moveToRenew;
-function getEnergy(creep, roomObject) {
-    var energy = roomObject;
-    if (energy) {
-        if (creep.pos.isNearTo(energy)) {
-            creep.pickup(energy);
-        }
-        else {
-            moveTo(creep, energy.pos);
-        }
-    }
-}
-exports.getEnergy = getEnergy;
-function canWork(creep) {
-    var working = creep.memory.working;
-    if (working && _.sum(creep.carry) === 0) {
-        creep.memory.working = false;
-        return false;
-    }
-    else if (!working && _.sum(creep.carry) === creep.carryCapacity) {
-        creep.memory.working = true;
-        return true;
-    }
-    else {
-        return creep.memory.working;
-    }
-}
-exports.canWork = canWork;
-function creepBuildCost(bodyParts) {
-    return bodyParts.reduce(function (cost, part) { return cost + BODYPART_COST[part]; }, 0);
-}
-exports.creepBuildCost = creepBuildCost;
-function harvestClosestSource(creep) {
-    var sources = creep.room.find(FIND_SOURCES);
-    if (sources.length) {
-        sources = sortClosestEnergySources(creep, sources);
-        var source = sources[0];
-        log_1.log.debug("harvester " + creep.name + " harvesting from " + source.id + ", " + source.pos);
-        moveToHarvest(creep, source);
-    }
-}
-exports.harvestClosestSource = harvestClosestSource;
-function sortByClosest(creep, objects) {
-    var creepPos = creep.pos;
-    return objects.sort(function (structA, structB) {
-        var lenA = creep.room.findPath(creepPos, structA.pos).length;
-        var lenB = creep.room.findPath(creepPos, structB.pos).length;
-        return lenA > lenB ? 1 : lenA < lenB ? -1 : 0;
-    });
-}
-exports.sortByClosest = sortByClosest;
-function sortMostNeedingRepair(structures) {
-    return structures.sort(function (sA, sB) {
-        var sAdeficit = sA.hitsMax - sA.hits;
-        var sBdeficit = sB.hitsMax - sB.hits;
-        return sAdeficit > sBdeficit ? 1 : sAdeficit < sBdeficit ? -1 : 0;
-    });
-}
-exports.sortMostNeedingRepair = sortMostNeedingRepair;
-function hasDecay(item) {
-    return item.structureType === STRUCTURE_RAMPART ||
-        item.structureType === STRUCTURE_ROAD ||
-        item.structureType === STRUCTURE_POWER_BANK ||
-        item.structureType === STRUCTURE_CONTAINER ||
-        item.structureType === STRUCTURE_PORTAL;
-}
-function isController(item) {
-    return item.structureType === STRUCTURE_CONTROLLER;
-}
-function sortMostNeedingEnergy(structures) {
-    return structures.sort(function (sA, sB) {
-        var aIsController = isController(sA);
-        var bIsController = isController(sB);
-        var aHasDecay = hasDecay(sA);
-        var bHasDecay = hasDecay(sB);
-        var chooseA = (aIsController || aHasDecay);
-        var chooseB = (bIsController || bHasDecay);
-        if (chooseA && !chooseB) {
-            return 1;
-        }
-        else if (chooseB && !chooseA) {
-            return -1;
-        }
-        else if (chooseA && chooseB) {
-            if (aIsController && bIsController) {
-                var aController = sA;
-                var aTicks = aController ? aController.ticksToDowngrade : 0;
-                var bController = sB;
-                var bTicks = bController ? bController.ticksToDowngrade : 0;
-                return aTicks < bTicks ? 1 : bTicks > aTicks ? -1 : 0;
-            }
-            else if (aIsController && !bIsController) {
-                return 1;
-            }
-            else if (bIsController && !aIsController) {
-                return -1;
-            }
-            else {
-                var aTicks = getStructureTicksToDecay(sA);
-                var bTicks = getStructureTicksToDecay(sB);
-                return aTicks < bTicks ? 1 : bTicks < aTicks ? -1 : 0;
-            }
-        }
-        else {
-            return 0;
-        }
-    });
-}
-exports.sortMostNeedingEnergy = sortMostNeedingEnergy;
-function sortClosestEnergySources(creep, energySources) {
-    var creepPos = creep.pos;
-    return energySources.sort(function (sourceA, sourceB) {
-        var lenA = creep.room.findPath(creepPos, sourceA.pos).length;
-        var lenB = creep.room.findPath(creepPos, sourceB.pos).length;
-        return lenA > lenB ? 1 : lenA < lenB ? -1 : 0;
-    });
-}
-exports.sortClosestEnergySources = sortClosestEnergySources;
-function tryHarvest(creep, target) {
-    return creep.harvest(target);
-}
-exports.tryHarvest = tryHarvest;
-function moveToHarvest(creep, target) {
-    if (tryHarvest(creep, target) === ERR_NOT_IN_RANGE) {
-        moveTo(creep, target.pos);
-    }
-}
-exports.moveToHarvest = moveToHarvest;
-function tryEnergyDropOff(creep, target) {
-    return creep.transfer(target, RESOURCE_ENERGY);
-}
-exports.tryEnergyDropOff = tryEnergyDropOff;
-function moveToDropEnergy(creep, target) {
-    if (tryEnergyDropOff(creep, target) === ERR_NOT_IN_RANGE) {
-        moveTo(creep, target.pos);
-    }
-}
-exports.moveToDropEnergy = moveToDropEnergy;
-function moveToRepair(creep, target) {
-    log_1.log.info("harveseter " + creep.name + " moving to repair target " + target.id +
-        (", " + target.pos + ", " + target.hits + " of " + target.hitsMax));
-    if (creep.repair(target) === ERR_NOT_IN_RANGE) {
-        moveTo(creep, target.pos);
-    }
-}
-exports.moveToRepair = moveToRepair;
-function moveToConstructionSite(creep, target) {
-    log_1.log.info("creep " + creep.name + " moving to construction site " + target.id);
-    if (creep.build(target) === ERR_NOT_IN_RANGE) {
-        moveTo(creep, target.pos);
-    }
-}
-exports.moveToConstructionSite = moveToConstructionSite;
-function getStructureTicksToDecay(structure) {
-    var rampart = structure;
-    if (rampart) {
-        return rampart.ticksToDecay;
-    }
-    var road = structure;
-    if (road) {
-        return road.ticksToDecay;
-    }
-    var powerBank = structure;
-    if (powerBank) {
-        return powerBank.ticksToDecay;
-    }
-    var container = structure;
-    if (container) {
-        return container.ticksToDecay;
-    }
-    var portal = structure;
-    if (portal) {
-        return portal.ticksToDecay;
-    }
-    return -1;
-}
-function structureIsDecaying(structure) {
-    var ticksToDecay = getStructureTicksToDecay(structure);
-    return ticksToDecay > -1 && ticksToDecay < 300;
-}
-exports.structureIsDecaying = structureIsDecaying;
-
-
-/***/ }),
 /* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -919,7 +919,7 @@ exports.LOG_VSC_URL_TEMPLATE = function (path, line) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var creepActions = __webpack_require__(2);
+var creepActions = __webpack_require__(1);
 var log_1 = __webpack_require__(0);
 function run(creep) {
     if (creepActions.needsRenew(creep)) {
@@ -967,7 +967,7 @@ var LogLevels;
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-var util = __webpack_require__(1);
+var util = __webpack_require__(2);
 var has = Object.prototype.hasOwnProperty;
 var hasNativeMap = typeof Map !== "undefined";
 
@@ -1241,7 +1241,7 @@ exports.decode = function base64VLQ_decode(aStr, aIndex, aOutParam) {
  */
 
 var base64VLQ = __webpack_require__(7);
-var util = __webpack_require__(1);
+var util = __webpack_require__(2);
 var ArraySet = __webpack_require__(6).ArraySet;
 var MappingList = __webpack_require__(18).MappingList;
 
@@ -1698,6 +1698,7 @@ exports.loop = !Config.USE_PROFILER ? mloop : function () { Profiler.wrap(mloop)
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var Config = __webpack_require__(3);
+var creepActions = __webpack_require__(1);
 var builder = __webpack_require__(12);
 var harvester = __webpack_require__(13);
 var repairer = __webpack_require__(14);
@@ -1738,29 +1739,31 @@ function _buildMissingCreeps(room, creeps) {
             log_1.log.info("Spawn: " + spawns[0].name);
         }
     }
-    if ((harvesters.length < (room.energyCapacityAvailable % 100)) ||
-        (spawns[0] && spawns[0].energy === spawns[0].energyCapacity)) {
-        if (room.energyCapacityAvailable > 800) {
-            bodyParts = [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+    if (!creeps.some(function (creep) { return creepActions.needsRenew(creep); })) {
+        if ((harvesters.length < (room.energyCapacityAvailable % 100)) ||
+            (spawns[0] && spawns[0].energy === spawns[0].energyCapacity)) {
+            if (room.energyCapacityAvailable > 800) {
+                bodyParts = [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+            }
+            else {
+                bodyParts = [WORK, WORK, CARRY, MOVE];
+            }
+            _.each(spawns, function (spawn) {
+                _spawnCreep(spawn, bodyParts, roles_1.Roles.Harvester);
+            });
         }
-        else {
-            bodyParts = [WORK, WORK, CARRY, MOVE];
+        if (builders.length < (harvesters.length * .5)) {
+            bodyParts = [WORK, CARRY, MOVE];
+            _.each(spawns, function (spawn) {
+                _spawnCreep(spawn, bodyParts, roles_1.Roles.Builder);
+            });
         }
-        _.each(spawns, function (spawn) {
-            _spawnCreep(spawn, bodyParts, roles_1.Roles.Harvester);
-        });
-    }
-    if (builders.length < (harvesters.length * .5)) {
-        bodyParts = [WORK, CARRY, MOVE];
-        _.each(spawns, function (spawn) {
-            _spawnCreep(spawn, bodyParts, roles_1.Roles.Builder);
-        });
-    }
-    if (repairers.length < builders.length) {
-        bodyParts = [WORK, CARRY, MOVE];
-        _.each(spawns, function (spawn) {
-            _spawnCreep(spawn, bodyParts, roles_1.Roles.Repairer);
-        });
+        if (repairers.length < builders.length) {
+            bodyParts = [WORK, CARRY, MOVE];
+            _.each(spawns, function (spawn) {
+                _spawnCreep(spawn, bodyParts, roles_1.Roles.Repairer);
+            });
+        }
     }
 }
 function _spawnCreep(spawn, bodyParts, role) {
@@ -1836,7 +1839,7 @@ exports.Roles = new CreepRoles();
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var creepActions = __webpack_require__(2);
+var creepActions = __webpack_require__(1);
 var baseCreep = __webpack_require__(4);
 function run(creep) {
     if (!baseCreep.run(creep)) {
@@ -1878,7 +1881,7 @@ exports.run = run;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var creepActions = __webpack_require__(2);
+var creepActions = __webpack_require__(1);
 var baseCreep = __webpack_require__(4);
 var log_1 = __webpack_require__(0);
 function run(creep) {
@@ -1930,7 +1933,7 @@ function checkSites(creep) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var creepActions = __webpack_require__(2);
+var creepActions = __webpack_require__(1);
 var baseCreep = __webpack_require__(4);
 var log_1 = __webpack_require__(0);
 function repairStructure(creep, structure) {
@@ -2553,7 +2556,7 @@ exports.search = function search(aNeedle, aHaystack, aCompare, aBias) {
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-var util = __webpack_require__(1);
+var util = __webpack_require__(2);
 
 /**
  * Determine whether mappingB is after mappingA with respect to generated
@@ -2758,7 +2761,7 @@ exports.quickSort = function (ary, comparator) {
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-var util = __webpack_require__(1);
+var util = __webpack_require__(2);
 var binarySearch = __webpack_require__(17);
 var ArraySet = __webpack_require__(6).ArraySet;
 var base64VLQ = __webpack_require__(7);
@@ -3847,7 +3850,7 @@ exports.IndexedSourceMapConsumer = IndexedSourceMapConsumer;
  */
 
 var SourceMapGenerator = __webpack_require__(8).SourceMapGenerator;
-var util = __webpack_require__(1);
+var util = __webpack_require__(2);
 
 // Matches a Windows-style `\r\n` newline or a `\n` newline used by all other
 // operating systems these days (capturing the result).

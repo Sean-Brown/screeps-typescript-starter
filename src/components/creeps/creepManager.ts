@@ -1,5 +1,6 @@
 import * as Config from "../../config/config";
 
+import * as creepActions from "./creepActions";
 import * as builder from "./roles/builder";
 import * as harvester from "./roles/harvester";
 import * as repairer from "./roles/repairer";
@@ -60,39 +61,40 @@ function _buildMissingCreeps(room: Room, creeps: Creep[]) {
     }
   }
 
-  // Check if we need more harvesters
-  if (
-    (harvesters.length < (room.energyCapacityAvailable % 100)) ||
-    (spawns[0] && spawns[0].energy === spawns[0].energyCapacity)
-  ) {
-    if (room.energyCapacityAvailable > 800) {
-      bodyParts = [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
-    } else {
-      bodyParts = [WORK, WORK, CARRY, MOVE];
+  // Check if we should build more units
+  if (!creeps.some((creep: Creep) => creepActions.needsRenew(creep))) {
+    // Check if we need more harvesters
+    if (
+      (harvesters.length < (room.energyCapacityAvailable % 100)) ||
+      (spawns[0] && spawns[0].energy === spawns[0].energyCapacity)
+    ) {
+      if (room.energyCapacityAvailable > 800) {
+        bodyParts = [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+      } else {
+        bodyParts = [WORK, WORK, CARRY, MOVE];
+      }
+      _.each(spawns, (spawn: Spawn) => {
+        _spawnCreep(spawn, bodyParts, Roles.Harvester);
+      });
     }
-    _.each(spawns, (spawn: Spawn) => {
-      _spawnCreep(spawn, bodyParts, Roles.Harvester);
-    });
-  }
-
-  // Check if we need more builders
-  if (
-    builders.length < (harvesters.length * .5)
-  ) {
-    bodyParts = [WORK, CARRY, MOVE];
-    _.each(spawns, (spawn: Spawn) => {
-      _spawnCreep(spawn, bodyParts, Roles.Builder);
-    });
-  }
-
-  // Check if we need more repairers
-  if (
-    repairers.length < builders.length
-  ) {
-    bodyParts = [WORK, CARRY, MOVE];
-    _.each(spawns, (spawn: Spawn) => {
-      _spawnCreep(spawn, bodyParts, Roles.Repairer);
-    });
+    // Check if we need more builders
+    if (
+      builders.length < (harvesters.length * .5)
+    ) {
+      bodyParts = [WORK, CARRY, MOVE];
+      _.each(spawns, (spawn: Spawn) => {
+        _spawnCreep(spawn, bodyParts, Roles.Builder);
+      });
+    }
+    // Check if we need more repairers
+    if (
+      repairers.length < builders.length
+    ) {
+      bodyParts = [WORK, CARRY, MOVE];
+      _.each(spawns, (spawn: Spawn) => {
+        _spawnCreep(spawn, bodyParts, Roles.Repairer);
+      });
+    }
   }
 }
 
