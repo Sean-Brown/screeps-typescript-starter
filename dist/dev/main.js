@@ -417,8 +417,12 @@ function tryEnergyDropOff(creep, target) {
 }
 exports.tryEnergyDropOff = tryEnergyDropOff;
 function moveToDropEnergy(creep, target) {
-    if (tryEnergyDropOff(creep, target) === ERR_NOT_IN_RANGE) {
+    var errCode = tryEnergyDropOff(creep, target);
+    if (errCode === ERR_NOT_IN_RANGE) {
         moveTo(creep, target.pos);
+    }
+    else if (errCode !== OK) {
+        console.error("creep " + creep.name + " received error " + errCode + " attempting to drop off energy at " + target.pos);
     }
 }
 exports.moveToDropEnergy = moveToDropEnergy;

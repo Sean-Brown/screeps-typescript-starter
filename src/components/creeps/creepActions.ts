@@ -217,8 +217,11 @@ export function tryEnergyDropOff(creep: Creep, target: Spawn | Structure | Conta
 }
 
 export function moveToDropEnergy(creep: Creep, target: Spawn | Structure | Container): void {
-  if (tryEnergyDropOff(creep, target) === ERR_NOT_IN_RANGE) {
+  const errCode = tryEnergyDropOff(creep, target);
+  if (errCode === ERR_NOT_IN_RANGE) {
     moveTo(creep, target.pos);
+  } else if (errCode !== OK) {
+    console.error(`creep ${creep.name} received error ${errCode} attempting to drop off energy at ${target.pos}`);
   }
 }
 
