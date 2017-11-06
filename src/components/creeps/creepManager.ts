@@ -36,6 +36,10 @@ export function run(room: Room): void {
   });
 }
 
+function _calcBodyCost(bodyParts: string[]): number {
+  return bodyParts.reduce((cost: number, part: string) => cost + BODYPART_COST[part], 0);
+}
+
 /**
  * Creates a new creep if we still have enough space.
  *
@@ -68,11 +72,15 @@ function _buildMissingCreeps(room: Room, creeps: Creep[]) {
     let doBuild = false;
     // Check if we need more harvesters
     if (harvesters.length < (capacity % 100)) {
-      if (capacity > 800 && available > 800) {
-        bodyParts = [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+      const body1 = [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+      const cost1 = _calcBodyCost(body1);
+      const body2 = [WORK, WORK, CARRY, MOVE];
+      const cost2 = _calcBodyCost(body2);
+      if (available > cost1) {
+        bodyParts = body1;
         doBuild = true;
-      } else if (available > 250) {
-        bodyParts = [WORK, WORK, CARRY, MOVE];
+      } else if (available > cost2) {
+        bodyParts = body2;
         doBuild = true;
       }
       if (doBuild) {
@@ -83,11 +91,15 @@ function _buildMissingCreeps(room: Room, creeps: Creep[]) {
     }
     // Check if we need more builders
     if (builders.length < (harvesters.length * .5)) {
-      if (capacity > 800 && available > 800) {
-        bodyParts = [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+      const body1 = [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+      const cost1 = _calcBodyCost(body1);
+      const body2 = [WORK, WORK, CARRY, MOVE];
+      const cost2 = _calcBodyCost(body2);
+      if (available > cost1) {
+        bodyParts = body1;
         doBuild = true;
-      } else if (available > 250) {
-        bodyParts = [WORK, WORK, CARRY, MOVE];
+      } else if (available > cost2) {
+        bodyParts = body2;
         doBuild = true;
       }
       if (doBuild) {
@@ -98,11 +110,15 @@ function _buildMissingCreeps(room: Room, creeps: Creep[]) {
     }
     // Check if we need more repairers
     if (repairers.length < builders.length) {
-      if (capacity > 800 && available > 800) {
-        bodyParts = [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+      const body1 = [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+      const cost1 = _calcBodyCost(body1);
+      const body2 = [WORK, WORK, CARRY, MOVE];
+      const cost2 = _calcBodyCost(body2);
+      if (available > cost1) {
+        bodyParts = body1;
         doBuild = true;
-      } else if (available > 250) {
-        bodyParts = [WORK, WORK, CARRY, MOVE];
+      } else if (available > cost2) {
+        bodyParts = body2;
         doBuild = true;
       }
       if (doBuild) {

@@ -1747,6 +1747,9 @@ function run(room) {
     });
 }
 exports.run = run;
+function _calcBodyCost(bodyParts) {
+    return bodyParts.reduce(function (cost, part) { return cost + BODYPART_COST[part]; }, 0);
+}
 function _buildMissingCreeps(room, creeps) {
     var bodyParts;
     var harvesters = _.filter(creeps, function (creep) { return roles_1.Roles.IsHarvester(creep); });
@@ -1767,12 +1770,16 @@ function _buildMissingCreeps(room, creeps) {
         var capacity = room.energyCapacityAvailable;
         var doBuild = false;
         if (harvesters.length < (capacity % 100)) {
-            if (capacity > 800 && available > 800) {
-                bodyParts = [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+            var body1 = [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+            var cost1 = _calcBodyCost(body1);
+            var body2 = [WORK, WORK, CARRY, MOVE];
+            var cost2 = _calcBodyCost(body2);
+            if (available > cost1) {
+                bodyParts = body1;
                 doBuild = true;
             }
-            else if (available > 250) {
-                bodyParts = [WORK, WORK, CARRY, MOVE];
+            else if (available > cost2) {
+                bodyParts = body2;
                 doBuild = true;
             }
             if (doBuild) {
@@ -1782,12 +1789,16 @@ function _buildMissingCreeps(room, creeps) {
             }
         }
         if (builders.length < (harvesters.length * .5)) {
-            if (capacity > 800 && available > 800) {
-                bodyParts = [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+            var body1 = [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+            var cost1 = _calcBodyCost(body1);
+            var body2 = [WORK, WORK, CARRY, MOVE];
+            var cost2 = _calcBodyCost(body2);
+            if (available > cost1) {
+                bodyParts = body1;
                 doBuild = true;
             }
-            else if (available > 250) {
-                bodyParts = [WORK, WORK, CARRY, MOVE];
+            else if (available > cost2) {
+                bodyParts = body2;
                 doBuild = true;
             }
             if (doBuild) {
@@ -1797,12 +1808,16 @@ function _buildMissingCreeps(room, creeps) {
             }
         }
         if (repairers.length < builders.length) {
-            if (capacity > 800 && available > 800) {
-                bodyParts = [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+            var body1 = [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+            var cost1 = _calcBodyCost(body1);
+            var body2 = [WORK, WORK, CARRY, MOVE];
+            var cost2 = _calcBodyCost(body2);
+            if (available > cost1) {
+                bodyParts = body1;
                 doBuild = true;
             }
-            else if (available > 250) {
-                bodyParts = [WORK, WORK, CARRY, MOVE];
+            else if (available > cost2) {
+                bodyParts = body2;
                 doBuild = true;
             }
             if (doBuild) {
