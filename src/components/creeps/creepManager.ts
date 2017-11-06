@@ -52,9 +52,9 @@ function getMaxHarvesters(room: Room): number {
   const controllerLevel = (room.controller ? room.controller.level : 0);
   switch (controllerLevel) {
     default:
-    case 0: return Config.BUILD_LEVELS.LEVEL_1.HARVESTERS;
-    case 1: return Config.BUILD_LEVELS.LEVEL_2.HARVESTERS;
-    case 2: return Config.BUILD_LEVELS.LEVEL_3.HARVESTERS;
+    case 0: return Config.BUILD_LEVELS.LEVEL_0.HARVESTERS;
+    case 1: return Config.BUILD_LEVELS.LEVEL_1.HARVESTERS;
+    case 2: return Config.BUILD_LEVELS.LEVEL_2.HARVESTERS;
   }
 }
 

@@ -933,13 +933,13 @@ exports.LOG_VSC_URL_TEMPLATE = function (path, line) {
     return exports.LOG_VSC.repo + "/blob/" + exports.LOG_VSC.revision + "/" + path + "#" + line;
 };
 exports.BUILD_LEVELS = {
-    LEVEL_1: {
+    LEVEL_0: {
         HARVESTERS: 2,
     },
-    LEVEL_2: {
+    LEVEL_1: {
         HARVESTERS: 4,
     },
-    LEVEL_3: {
+    LEVEL_2: {
         HARVESTERS: 8,
     },
 };
@@ -1767,9 +1767,9 @@ function getMaxHarvesters(room) {
     var controllerLevel = (room.controller ? room.controller.level : 0);
     switch (controllerLevel) {
         default:
-        case 0: return Config.BUILD_LEVELS.LEVEL_1.HARVESTERS;
-        case 1: return Config.BUILD_LEVELS.LEVEL_2.HARVESTERS;
-        case 2: return Config.BUILD_LEVELS.LEVEL_3.HARVESTERS;
+        case 0: return Config.BUILD_LEVELS.LEVEL_0.HARVESTERS;
+        case 1: return Config.BUILD_LEVELS.LEVEL_1.HARVESTERS;
+        case 2: return Config.BUILD_LEVELS.LEVEL_2.HARVESTERS;
     }
 }
 function _buildMissingCreeps(room, creeps) {
