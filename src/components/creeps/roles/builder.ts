@@ -11,12 +11,12 @@ export function run(creep: Creep): void {
   if (!baseCreep.run(creep)) {
     return;
   }
-
-  if (creep.memory.building && creep.carry.energy === 0) {
+  const creepEnergy = creep.carry.energy ? creep.carry.energy : 0;
+  if (creep.memory.building && creepEnergy === 0) {
     creep.memory.building = false;
     creep.say("Harvesting");
   }
-  if (!creep.memory.building && creep.carry.energy === creep.carryCapacity) {
+  if (!creep.memory.building && (creepEnergy >= (creep.carryCapacity * .75))) {
     creep.memory.building = true;
     creep.say("Building");
   }

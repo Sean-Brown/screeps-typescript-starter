@@ -299,11 +299,12 @@ function getEnergy(creep, roomObject) {
 exports.getEnergy = getEnergy;
 function canWork(creep) {
     var working = creep.memory.working;
-    if (working && (creep.carry.energy === 0)) {
+    var creepEnergy = creep.carry.energy ? creep.carry.energy : 0;
+    if (working && creepEnergy === 0) {
         creep.memory.working = false;
         return false;
     }
-    else if (!working && (creep.carry.energy === creep.carryCapacity)) {
+    else if (!working && creepEnergy === creep.carryCapacity) {
         creep.memory.working = true;
         return true;
     }
@@ -943,8 +944,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var creepActions = __webpack_require__(1);
 var log_1 = __webpack_require__(0);
 function run(creep) {
+    var creepEnergy = creep.carry.energy ? creep.carry.energy : 0;
     if (creepActions.needsRenew(creep)) {
-        if (creep.carry.energy && (creep.carry.energy > 0)) {
+        if (creepEnergy > 0) {
             return true;
         }
         var spawn = creep.pos.findClosestByPath(FIND_MY_SPAWNS, {
@@ -1907,11 +1909,12 @@ function run(creep) {
     if (!baseCreep.run(creep)) {
         return;
     }
-    if (creep.memory.building && creep.carry.energy === 0) {
+    var creepEnergy = creep.carry.energy ? creep.carry.energy : 0;
+    if (creep.memory.building && creepEnergy === 0) {
         creep.memory.building = false;
         creep.say("Harvesting");
     }
-    if (!creep.memory.building && creep.carry.energy === creep.carryCapacity) {
+    if (!creep.memory.building && (creepEnergy >= (creep.carryCapacity * .75))) {
         creep.memory.building = true;
         creep.say("Building");
     }
@@ -1950,7 +1953,8 @@ function run(creep) {
     if (!baseCreep.run(creep)) {
         return;
     }
-    if (creep.carry.energy && (creep.carry.energy < creep.carryCapacity)) {
+    var creepEnergy = creep.carry.energy ? creep.carry.energy : 0;
+    if (creepEnergy < creep.carryCapacity) {
         creepActions.harvestClosestSource(creep);
         return;
     }
@@ -2024,11 +2028,12 @@ function run(creep) {
     if (!baseCreep.run(creep)) {
         return;
     }
-    if (creep.memory.repairing && creep.carry.energy === 0) {
+    var creepEnergy = creep.carry.energy ? creep.carry.energy : 0;
+    if (creep.memory.repairing && creepEnergy === 0) {
         creep.memory.repairing = false;
         creep.say("Harvesting");
     }
-    if (!creep.memory.repairing && creep.carry.energy === creep.carryCapacity) {
+    if (!creep.memory.repairing && (creepEnergy >= (creep.carryCapacity * .75))) {
         creep.memory.repairing = true;
         creep.say("Repairing");
     }

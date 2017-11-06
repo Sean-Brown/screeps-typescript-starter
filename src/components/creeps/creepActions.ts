@@ -80,11 +80,11 @@ export function getEnergy(creep: Creep, roomObject: RoomObject): void {
  */
 export function canWork(creep: Creep): boolean {
   const working = creep.memory.working;
-
-  if (working && (creep.carry.energy === 0)) {
+  const creepEnergy = creep.carry.energy ? creep.carry.energy : 0;
+  if (working && creepEnergy === 0) {
     creep.memory.working = false;
     return false;
-  } else if (!working && (creep.carry.energy === creep.carryCapacity)) {
+  } else if (!working && creepEnergy === creep.carryCapacity) {
     creep.memory.working = true;
     return true;
   } else {
