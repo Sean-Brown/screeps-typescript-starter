@@ -1799,12 +1799,12 @@ function _buildMissingCreeps(room, creeps) {
                 });
             }
         }
-        if (builders.length < (harvesters.length * .5)) {
+        if (builders.length < (numHarvesters * .5)) {
             var body_2 = builder.getBody(room);
             var cost = _calcBodyCost(body_2);
             if (available >= cost) {
                 _.each(spawns, function (spawn) {
-                    _spawnCreep(spawn, body_2, roles_1.Roles.Harvester);
+                    _spawnCreep(spawn, body_2, roles_1.Roles.Builder);
                 });
             }
         }
@@ -1813,7 +1813,7 @@ function _buildMissingCreeps(room, creeps) {
             var cost = _calcBodyCost(body_3);
             if (available >= cost) {
                 _.each(spawns, function (spawn) {
-                    _spawnCreep(spawn, body_3, roles_1.Roles.Harvester);
+                    _spawnCreep(spawn, body_3, roles_1.Roles.Repairer);
                 });
             }
         }
