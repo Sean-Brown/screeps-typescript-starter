@@ -932,6 +932,17 @@ exports.LOG_VSC = { repo: "@@_repo_@@", revision: "", valid: false };
 exports.LOG_VSC_URL_TEMPLATE = function (path, line) {
     return exports.LOG_VSC.repo + "/blob/" + exports.LOG_VSC.revision + "/" + path + "#" + line;
 };
+exports.BUILD_LEVELS = {
+    LEVEL_1: {
+        HARVESTERS: 4,
+    },
+    LEVEL_2: {
+        HARVESTERS: 6,
+    },
+    LEVEL_3: {
+        HARVESTERS: 6,
+    },
+};
 
 
 /***/ }),
@@ -1752,8 +1763,16 @@ exports.run = run;
 function _calcBodyCost(bodyParts) {
     return bodyParts.reduce(function (cost, part) { return cost + BODYPART_COST[part]; }, 0);
 }
+function getMaxHarvesters(room) {
+    var controllerLevel = (room.controller ? room.controller.level : 0);
+    switch (controllerLevel) {
+        default:
+        case 0: return Config.BUILD_LEVELS.LEVEL_1.HARVESTERS;
+        case 1: return Config.BUILD_LEVELS.LEVEL_2.HARVESTERS;
+        case 2: return Config.BUILD_LEVELS.LEVEL_3.HARVESTERS;
+    }
+}
 function _buildMissingCreeps(room, creeps) {
-    var bodyParts;
     var harvesters = _.filter(creeps, function (creep) { return roles_1.Roles.IsHarvester(creep); });
     var builders = _.filter(creeps, function (creep) { return roles_1.Roles.IsBuilder(creep); });
     var repairers = _.filter(creeps, function (creep) { return roles_1.Roles.IsRepairer(creep); });
@@ -1770,61 +1789,31 @@ function _buildMissingCreeps(room, creeps) {
     if (!creeps.some(function (creep) { return creepActions.needsRenew(creep); })) {
         var available = room.energyAvailable;
         var capacity = room.energyCapacityAvailable;
-        var doBuild = false;
-        if (harvesters.length < (capacity % 100)) {
-            var body1 = [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
-            var cost1 = _calcBodyCost(body1);
-            var body2 = [WORK, WORK, CARRY, MOVE];
-            var cost2 = _calcBodyCost(body2);
-            if (available > cost1) {
-                bodyParts = body1;
-                doBuild = true;
-            }
-            else if (available > cost2) {
-                bodyParts = body2;
-                doBuild = true;
-            }
-            if (doBuild) {
+        var numHarvesters = harvesters.length;
+        if ((numHarvesters < (capacity % 100) && (numHarvesters < getMaxHarvesters(room)))) {
+            var body_1 = harvester.getBody(room);
+            var cost = _calcBodyCost(body_1);
+            if (available > cost) {
                 _.each(spawns, function (spawn) {
-                    _spawnCreep(spawn, bodyParts, roles_1.Roles.Harvester);
+                    _spawnCreep(spawn, body_1, roles_1.Roles.Harvester);
                 });
             }
         }
         if (builders.length < (harvesters.length * .5)) {
-            var body1 = [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
-            var cost1 = _calcBodyCost(body1);
-            var body2 = [WORK, WORK, CARRY, MOVE];
-            var cost2 = _calcBodyCost(body2);
-            if (available > cost1) {
-                bodyParts = body1;
-                doBuild = true;
-            }
-            else if (available > cost2) {
-                bodyParts = body2;
-                doBuild = true;
-            }
-            if (doBuild) {
+            var body_2 = builder.getBody(room);
+            var cost = _calcBodyCost(body_2);
+            if (available > cost) {
                 _.each(spawns, function (spawn) {
-                    _spawnCreep(spawn, bodyParts, roles_1.Roles.Builder);
+                    _spawnCreep(spawn, body_2, roles_1.Roles.Harvester);
                 });
             }
         }
         if (repairers.length < builders.length) {
-            var body1 = [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
-            var cost1 = _calcBodyCost(body1);
-            var body2 = [WORK, WORK, CARRY, MOVE];
-            var cost2 = _calcBodyCost(body2);
-            if (available > cost1) {
-                bodyParts = body1;
-                doBuild = true;
-            }
-            else if (available > cost2) {
-                bodyParts = body2;
-                doBuild = true;
-            }
-            if (doBuild) {
+            var body_3 = repairer.getBody(room);
+            var cost = _calcBodyCost(body_3);
+            if (available > cost) {
                 _.each(spawns, function (spawn) {
-                    _spawnCreep(spawn, bodyParts, roles_1.Roles.Repairer);
+                    _spawnCreep(spawn, body_3, roles_1.Roles.Harvester);
                 });
             }
         }
@@ -1937,6 +1926,16 @@ function run(creep) {
     }
 }
 exports.run = run;
+function getBody(room) {
+    var controllerLevel = (room.controller ? room.controller.level : 0);
+    switch (controllerLevel) {
+        default:
+        case 0: return [WORK, WORK, CARRY, MOVE];
+        case 1: return [WORK, WORK, CARRY, MOVE];
+        case 2: return [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+    }
+}
+exports.getBody = getBody;
 
 
 /***/ }),
@@ -1998,6 +1997,16 @@ function checkSites(creep) {
     }
     return true;
 }
+function getBody(room) {
+    var controllerLevel = (room.controller ? room.controller.level : 0);
+    switch (controllerLevel) {
+        default:
+        case 0: return [WORK, WORK, CARRY, MOVE];
+        case 1: return [WORK, WORK, CARRY, MOVE];
+        case 2: return [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+    }
+}
+exports.getBody = getBody;
 
 
 /***/ }),
@@ -2105,6 +2114,16 @@ function run(creep) {
     }
 }
 exports.run = run;
+function getBody(room) {
+    var controllerLevel = (room.controller ? room.controller.level : 0);
+    switch (controllerLevel) {
+        default:
+        case 0: return [WORK, WORK, CARRY, MOVE];
+        case 1: return [WORK, WORK, CARRY, MOVE];
+        case 2: return [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+    }
+}
+exports.getBody = getBody;
 
 
 /***/ }),

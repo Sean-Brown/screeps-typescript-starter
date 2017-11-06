@@ -55,3 +55,15 @@ export const LOG_VSC = { repo: "@@_repo_@@", revision: __REVISION__, valid: fals
 export const LOG_VSC_URL_TEMPLATE = (path: string, line: string) => {
   return `${LOG_VSC.repo}/blob/${LOG_VSC.revision}/${path}#${line}`;
 };
+
+export const BUILD_LEVELS = {
+  LEVEL_1: {
+    HARVESTERS: 4,
+  },
+  LEVEL_2: {
+    HARVESTERS: 6,
+  },
+  LEVEL_3: {
+    HARVESTERS: 6,
+  },
+};

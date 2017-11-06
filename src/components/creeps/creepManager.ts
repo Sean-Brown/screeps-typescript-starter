@@ -36,8 +36,26 @@ export function run(room: Room): void {
   });
 }
 
+/**
+ * Calculate the cost of the given creep body
+ * @param {string[]} bodyParts
+ */
 function _calcBodyCost(bodyParts: string[]): number {
   return bodyParts.reduce((cost: number, part: string) => cost + BODYPART_COST[part], 0);
+}
+
+/**
+ * Get the maximum number of harvesters there should be based on the controller level
+ * @param room
+ */
+function getMaxHarvesters(room: Room): number {
+  const controllerLevel = (room.controller ? room.controller.level : 0);
+  switch (controllerLevel) {
+    default:
+    case 0: return Config.BUILD_LEVELS.LEVEL_1.HARVESTERS;
+    case 1: return Config.BUILD_LEVELS.LEVEL_2.HARVESTERS;
+    case 2: return Config.BUILD_LEVELS.LEVEL_3.HARVESTERS;
+  }
 }
 
 /**
@@ -46,8 +64,6 @@ function _calcBodyCost(bodyParts: string[]): number {
  * @param {Room} room
  */
 function _buildMissingCreeps(room: Room, creeps: Creep[]) {
-  let bodyParts: string[];
-
   // Iterate through each creep and push them into the role array.
   const harvesters = _.filter(creeps, (creep) => Roles.IsHarvester(creep));
   const builders = _.filter(creeps, (creep) => Roles.IsBuilder(creep));
@@ -69,61 +85,34 @@ function _buildMissingCreeps(room: Room, creeps: Creep[]) {
   if (!creeps.some((creep: Creep) => creepActions.needsRenew(creep))) {
     const available = room.energyAvailable;
     const capacity = room.energyCapacityAvailable;
-    let doBuild = false;
     // Check if we need more harvesters
-    if (harvesters.length < (capacity % 100)) {
-      const body1 = [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
-      const cost1 = _calcBodyCost(body1);
-      const body2 = [WORK, WORK, CARRY, MOVE];
-      const cost2 = _calcBodyCost(body2);
-      if (available > cost1) {
-        bodyParts = body1;
-        doBuild = true;
-      } else if (available > cost2) {
-        bodyParts = body2;
-        doBuild = true;
-      }
-      if (doBuild) {
+    const numHarvesters = harvesters.length;
+    if ((numHarvesters < (capacity % 100) && (numHarvesters < getMaxHarvesters(room)))) {
+      const body = harvester.getBody(room);
+      const cost = _calcBodyCost(body);
+      if (available > cost) {
         _.each(spawns, (spawn: Spawn) => {
-          _spawnCreep(spawn, bodyParts, Roles.Harvester);
+          _spawnCreep(spawn, body, Roles.Harvester);
         });
       }
     }
     // Check if we need more builders
     if (builders.length < (harvesters.length * .5)) {
-      const body1 = [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
-      const cost1 = _calcBodyCost(body1);
-      const body2 = [WORK, WORK, CARRY, MOVE];
-      const cost2 = _calcBodyCost(body2);
-      if (available > cost1) {
-        bodyParts = body1;
-        doBuild = true;
-      } else if (available > cost2) {
-        bodyParts = body2;
-        doBuild = true;
-      }
-      if (doBuild) {
+      const body = builder.getBody(room);
+      const cost = _calcBodyCost(body);
+      if (available > cost) {
         _.each(spawns, (spawn: Spawn) => {
-          _spawnCreep(spawn, bodyParts, Roles.Builder);
+          _spawnCreep(spawn, body, Roles.Harvester);
         });
       }
     }
     // Check if we need more repairers
     if (repairers.length < builders.length) {
-      const body1 = [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
-      const cost1 = _calcBodyCost(body1);
-      const body2 = [WORK, WORK, CARRY, MOVE];
-      const cost2 = _calcBodyCost(body2);
-      if (available > cost1) {
-        bodyParts = body1;
-        doBuild = true;
-      } else if (available > cost2) {
-        bodyParts = body2;
-        doBuild = true;
-      }
-      if (doBuild) {
+      const body = repairer.getBody(room);
+      const cost = _calcBodyCost(body);
+      if (available > cost) {
         _.each(spawns, (spawn: Spawn) => {
-          _spawnCreep(spawn, bodyParts, Roles.Repairer);
+          _spawnCreep(spawn, body, Roles.Harvester);
         });
       }
     }
