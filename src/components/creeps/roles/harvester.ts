@@ -32,7 +32,7 @@ export function run(creep: Creep): void {
 
   // Check if any controllers need energy
   const controllers = creep.room.find<Controller>(FIND_STRUCTURES, {
-    filter: (s: Structure) => (s.structureType === STRUCTURE_CONTROLLER) && ((s as Controller).ticksToDowngrade < 300),
+    filter: (s: Structure) => (s.structureType === STRUCTURE_CONTROLLER) && ((s as Controller).ticksToDowngrade < 3000),
   });
   if (controllers.length) {
     const controller = creepActions.sortByClosest(creep, controllers)[0];

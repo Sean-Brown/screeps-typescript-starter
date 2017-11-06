@@ -1972,7 +1972,7 @@ function run(creep) {
         return;
     }
     var controllers = creep.room.find(FIND_STRUCTURES, {
-        filter: function (s) { return (s.structureType === STRUCTURE_CONTROLLER) && (s.ticksToDowngrade < 300); },
+        filter: function (s) { return (s.structureType === STRUCTURE_CONTROLLER) && (s.ticksToDowngrade < 3000); },
     });
     if (controllers.length) {
         var controller = creepActions.sortByClosest(creep, controllers)[0];
