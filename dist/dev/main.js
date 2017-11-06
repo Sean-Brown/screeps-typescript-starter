@@ -1970,6 +1970,15 @@ function run(creep) {
         creepActions.moveToDropEnergy(creep, spawn);
         return;
     }
+    var controllers = creep.room.find(FIND_STRUCTURES, {
+        filter: function (s) { return (s.structureType === STRUCTURE_CONTROLLER) && (s.ticksToDowngrade < 300); },
+    });
+    if (controllers.length) {
+        var controller = creepActions.sortByClosest(creep, controllers)[0];
+        log_1.log.info("creep " + creep.name + " moving energy to controller " + controller.id);
+        creepActions.moveToDropEnergy(creep, controller);
+        return;
+    }
     var extensions = creep.room.find(FIND_MY_STRUCTURES, {
         filter: function (s) { return (s.structureType === STRUCTURE_EXTENSION) && (s.energy < s.energyCapacity); },
     });

@@ -30,6 +30,17 @@ export function run(creep: Creep): void {
     return;
   }
 
+  // Check if any controllers need energy
+  const controllers = creep.room.find<Controller>(FIND_STRUCTURES, {
+    filter: (s: Structure) => (s.structureType === STRUCTURE_CONTROLLER) && ((s as Controller).ticksToDowngrade < 300),
+  });
+  if (controllers.length) {
+    const controller = creepActions.sortByClosest(creep, controllers)[0];
+    log.info(`creep ${creep.name} moving energy to controller ${controller.id}`);
+    creepActions.moveToDropEnergy(creep, controller);
+    return;
+  }
+
   // Find extensions that need energy
   const extensions = creep.room.find<Extension>(FIND_MY_STRUCTURES, {
     filter: (s: Structure) => (s.structureType === STRUCTURE_EXTENSION)  && ((s as Extension).energy < (s as Extension).energyCapacity),
