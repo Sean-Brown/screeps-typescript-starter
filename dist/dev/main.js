@@ -1792,7 +1792,7 @@ function _buildMissingCreeps(room, creeps) {
         if (numHarvesters < getMaxHarvesters(room)) {
             var body_1 = harvester.getBody(room);
             var cost = _calcBodyCost(body_1);
-            if (available > cost) {
+            if (available >= cost) {
                 _.each(spawns, function (spawn) {
                     _spawnCreep(spawn, body_1, roles_1.Roles.Harvester);
                 });
@@ -1801,7 +1801,7 @@ function _buildMissingCreeps(room, creeps) {
         if (builders.length < (harvesters.length * .5)) {
             var body_2 = builder.getBody(room);
             var cost = _calcBodyCost(body_2);
-            if (available > cost) {
+            if (available >= cost) {
                 _.each(spawns, function (spawn) {
                     _spawnCreep(spawn, body_2, roles_1.Roles.Harvester);
                 });
@@ -1810,7 +1810,7 @@ function _buildMissingCreeps(room, creeps) {
         if (repairers.length < builders.length) {
             var body_3 = repairer.getBody(room);
             var cost = _calcBodyCost(body_3);
-            if (available > cost) {
+            if (available >= cost) {
                 _.each(spawns, function (spawn) {
                     _spawnCreep(spawn, body_3, roles_1.Roles.Harvester);
                 });
