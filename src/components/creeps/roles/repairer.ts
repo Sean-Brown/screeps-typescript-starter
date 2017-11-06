@@ -130,7 +130,8 @@ export function getBody(room: Room): string[] {
   switch (controllerLevel) {
     default:
     case 0: return [WORK, CARRY, MOVE];
-    case 1: return [WORK, WORK, CARRY, MOVE];
-    case 2: return [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+    case 1: return [WORK, CARRY, MOVE];
+    case 2: return [WORK, WORK, CARRY, MOVE];
+    case 3: return [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
   }
 }
