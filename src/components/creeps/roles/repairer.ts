@@ -129,7 +129,7 @@ export function getBody(room: Room): string[] {
   const controllerLevel = (room.controller ? room.controller.level : 0);
   switch (controllerLevel) {
     default:
-    case 0: return [WORK, WORK, CARRY, MOVE];
+    case 0: return [WORK, CARRY, MOVE];
     case 1: return [WORK, WORK, CARRY, MOVE];
     case 2: return [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
   }
