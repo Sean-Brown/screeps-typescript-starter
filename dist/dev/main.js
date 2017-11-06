@@ -1759,13 +1759,23 @@ function _buildMissingCreeps(room, creeps) {
             });
         }
         if (builders.length < (harvesters.length * .5)) {
-            bodyParts = [WORK, CARRY, MOVE];
+            if (room.energyCapacityAvailable > 800) {
+                bodyParts = [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+            }
+            else {
+                bodyParts = [WORK, WORK, CARRY, MOVE];
+            }
             _.each(spawns, function (spawn) {
                 _spawnCreep(spawn, bodyParts, roles_1.Roles.Builder);
             });
         }
         if (repairers.length < builders.length) {
-            bodyParts = [WORK, CARRY, MOVE];
+            if (room.energyCapacityAvailable > 800) {
+                bodyParts = [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+            }
+            else {
+                bodyParts = [WORK, WORK, CARRY, MOVE];
+            }
             _.each(spawns, function (spawn) {
                 _spawnCreep(spawn, bodyParts, roles_1.Roles.Repairer);
             });
