@@ -1948,6 +1948,15 @@ function run(creep) {
         creepActions.moveToDropEnergy(creep, spawn);
         return;
     }
+    var extensions = creep.room.find(FIND_MY_STRUCTURES, {
+        filter: function (s) { return (s.structureType === STRUCTURE_EXTENSION) && (s.energy < s.energyCapacity); },
+    });
+    if (extensions.length) {
+        var extension = creepActions.sortByClosest(creep, extensions)[0];
+        log_1.log.info("creep " + creep.name + " moving energy to extension " + extension.id);
+        creepActions.moveToDropEnergy(creep, extension);
+        return;
+    }
     var container = creep.pos.findClosestByPath(FIND_STRUCTURES, {
         filter: function (s) { return (s.structureType === STRUCTURE_CONTAINER) && (_.sum(s.store) < s.storeCapacity); },
     });

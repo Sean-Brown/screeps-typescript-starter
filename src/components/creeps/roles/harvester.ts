@@ -29,6 +29,17 @@ export function run(creep: Creep): void {
     return;
   }
 
+  // Find extensions that need energy
+  const extensions = creep.room.find<Extension>(FIND_MY_STRUCTURES, {
+    filter: (s: Structure) => (s.structureType === STRUCTURE_EXTENSION)  && ((s as Extension).energy < (s as Extension).energyCapacity),
+  });
+  if (extensions.length) {
+    const extension = creepActions.sortByClosest(creep, extensions)[0];
+    log.info(`creep ${creep.name} moving energy to extension ${extension.id}`);
+    creepActions.moveToDropEnergy(creep, extension);
+    return;
+  }
+
   // Find containers that need energy
   const container = creep.pos.findClosestByPath<Container>(FIND_STRUCTURES, {
     filter: (s: Structure) => (s.structureType === STRUCTURE_CONTAINER) && (_.sum((s as Container).store) < (s as Container).storeCapacity),
