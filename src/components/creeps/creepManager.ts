@@ -84,10 +84,9 @@ function _buildMissingCreeps(room: Room, creeps: Creep[]) {
   // Check if we should build more units
   if (!creeps.some((creep: Creep) => creepActions.needsRenew(creep))) {
     const available = room.energyAvailable;
-    const capacity = room.energyCapacityAvailable;
     // Check if we need more harvesters
     const numHarvesters = harvesters.length;
-    if ((numHarvesters < (capacity % 100) && (numHarvesters < getMaxHarvesters(room)))) {
+    if (numHarvesters < getMaxHarvesters(room)) {
       const body = harvester.getBody(room);
       const cost = _calcBodyCost(body);
       if (available > cost) {

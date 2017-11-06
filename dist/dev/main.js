@@ -934,13 +934,13 @@ exports.LOG_VSC_URL_TEMPLATE = function (path, line) {
 };
 exports.BUILD_LEVELS = {
     LEVEL_1: {
-        HARVESTERS: 4,
+        HARVESTERS: 2,
     },
     LEVEL_2: {
         HARVESTERS: 6,
     },
     LEVEL_3: {
-        HARVESTERS: 6,
+        HARVESTERS: 8,
     },
 };
 
@@ -1788,9 +1788,8 @@ function _buildMissingCreeps(room, creeps) {
     }
     if (!creeps.some(function (creep) { return creepActions.needsRenew(creep); })) {
         var available = room.energyAvailable;
-        var capacity = room.energyCapacityAvailable;
         var numHarvesters = harvesters.length;
-        if ((numHarvesters < (capacity % 100) && (numHarvesters < getMaxHarvesters(room)))) {
+        if (numHarvesters < getMaxHarvesters(room)) {
             var body_1 = harvester.getBody(room);
             var cost = _calcBodyCost(body_1);
             if (available > cost) {

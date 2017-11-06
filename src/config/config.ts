@@ -58,12 +58,12 @@ export const LOG_VSC_URL_TEMPLATE = (path: string, line: string) => {
 
 export const BUILD_LEVELS = {
   LEVEL_1: {
-    HARVESTERS: 4,
+    HARVESTERS: 2,
   },
   LEVEL_2: {
     HARVESTERS: 6,
   },
   LEVEL_3: {
-    HARVESTERS: 6,
+    HARVESTERS: 8,
   },
 };
