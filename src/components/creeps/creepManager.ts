@@ -63,45 +63,53 @@ function _buildMissingCreeps(room: Room, creeps: Creep[]) {
 
   // Check if we should build more units
   if (!creeps.some((creep: Creep) => creepActions.needsRenew(creep))) {
+    const available = room.energyAvailable;
+    const capacity = room.energyCapacityAvailable;
+    let doBuild = false;
     // Check if we need more harvesters
-    if (
-      (harvesters.length < (room.energyCapacityAvailable % 100)) ||
-      (spawns[0] && spawns[0].energy === spawns[0].energyCapacity)
-    ) {
-      if (room.energyCapacityAvailable > 800) {
+    if (harvesters.length < (capacity % 100)) {
+      if (capacity > 800 && available > 800) {
         bodyParts = [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
-      } else {
+        doBuild = true;
+      } else if (available > 250) {
         bodyParts = [WORK, WORK, CARRY, MOVE];
+        doBuild = true;
       }
-      _.each(spawns, (spawn: Spawn) => {
-        _spawnCreep(spawn, bodyParts, Roles.Harvester);
-      });
+      if (doBuild) {
+        _.each(spawns, (spawn: Spawn) => {
+          _spawnCreep(spawn, bodyParts, Roles.Harvester);
+        });
+      }
     }
     // Check if we need more builders
-    if (
-      builders.length < (harvesters.length * .5)
-    ) {
-      if (room.energyCapacityAvailable > 800) {
+    if (builders.length < (harvesters.length * .5)) {
+      if (capacity > 800 && available > 800) {
         bodyParts = [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
-      } else {
+        doBuild = true;
+      } else if (available > 250) {
         bodyParts = [WORK, WORK, CARRY, MOVE];
+        doBuild = true;
       }
-      _.each(spawns, (spawn: Spawn) => {
-        _spawnCreep(spawn, bodyParts, Roles.Builder);
-      });
+      if (doBuild) {
+        _.each(spawns, (spawn: Spawn) => {
+          _spawnCreep(spawn, bodyParts, Roles.Builder);
+        });
+      }
     }
     // Check if we need more repairers
-    if (
-      repairers.length < builders.length
-    ) {
-      if (room.energyCapacityAvailable > 800) {
+    if (repairers.length < builders.length) {
+      if (capacity > 800 && available > 800) {
         bodyParts = [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
-      } else {
+        doBuild = true;
+      } else if (available > 250) {
         bodyParts = [WORK, WORK, CARRY, MOVE];
+        doBuild = true;
       }
-      _.each(spawns, (spawn: Spawn) => {
-        _spawnCreep(spawn, bodyParts, Roles.Repairer);
-      });
+      if (doBuild) {
+        _.each(spawns, (spawn: Spawn) => {
+          _spawnCreep(spawn, bodyParts, Roles.Repairer);
+        });
+      }
     }
   }
 }

@@ -1746,39 +1746,53 @@ function _buildMissingCreeps(room, creeps) {
         }
     }
     if (!creeps.some(function (creep) { return creepActions.needsRenew(creep); })) {
-        if ((harvesters.length < (room.energyCapacityAvailable % 100)) ||
-            (spawns[0] && spawns[0].energy === spawns[0].energyCapacity)) {
-            if (room.energyCapacityAvailable > 800) {
+        var available = room.energyAvailable;
+        var capacity = room.energyCapacityAvailable;
+        var doBuild = false;
+        if (harvesters.length < (capacity % 100)) {
+            if (capacity > 800 && available > 800) {
                 bodyParts = [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+                doBuild = true;
             }
-            else {
+            else if (available > 250) {
                 bodyParts = [WORK, WORK, CARRY, MOVE];
+                doBuild = true;
             }
-            _.each(spawns, function (spawn) {
-                _spawnCreep(spawn, bodyParts, roles_1.Roles.Harvester);
-            });
+            if (doBuild) {
+                _.each(spawns, function (spawn) {
+                    _spawnCreep(spawn, bodyParts, roles_1.Roles.Harvester);
+                });
+            }
         }
         if (builders.length < (harvesters.length * .5)) {
-            if (room.energyCapacityAvailable > 800) {
+            if (capacity > 800 && available > 800) {
                 bodyParts = [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+                doBuild = true;
             }
-            else {
+            else if (available > 250) {
                 bodyParts = [WORK, WORK, CARRY, MOVE];
+                doBuild = true;
             }
-            _.each(spawns, function (spawn) {
-                _spawnCreep(spawn, bodyParts, roles_1.Roles.Builder);
-            });
+            if (doBuild) {
+                _.each(spawns, function (spawn) {
+                    _spawnCreep(spawn, bodyParts, roles_1.Roles.Builder);
+                });
+            }
         }
         if (repairers.length < builders.length) {
-            if (room.energyCapacityAvailable > 800) {
+            if (capacity > 800 && available > 800) {
                 bodyParts = [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+                doBuild = true;
             }
-            else {
+            else if (available > 250) {
                 bodyParts = [WORK, WORK, CARRY, MOVE];
+                doBuild = true;
             }
-            _.each(spawns, function (spawn) {
-                _spawnCreep(spawn, bodyParts, roles_1.Roles.Repairer);
-            });
+            if (doBuild) {
+                _.each(spawns, function (spawn) {
+                    _spawnCreep(spawn, bodyParts, roles_1.Roles.Repairer);
+                });
+            }
         }
     }
 }
