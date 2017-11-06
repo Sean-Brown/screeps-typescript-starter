@@ -957,7 +957,7 @@ var log_1 = __webpack_require__(0);
 function run(creep) {
     var creepEnergy = creep.carry.energy ? creep.carry.energy : 0;
     if (creepActions.needsRenew(creep)) {
-        if (creepEnergy > 0) {
+        if (creepEnergy > 0 && creep.ticksToLive > 60) {
             return true;
         }
         var spawn = creep.pos.findClosestByPath(FIND_MY_SPAWNS, {
