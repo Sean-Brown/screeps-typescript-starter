@@ -109,7 +109,7 @@ export function creepBuildCost(bodyParts: string[]): number {
  */
 export function gatherEnergy(creep: Creep) {
   const container = creep.pos.findClosestByPath<Container>(FIND_STRUCTURES, {
-    filter: (s: Structure) => (s.structureType === STRUCTURE_CONTAINER) && (_.sum((s as Container).store) > ((s as Container).storeCapacity * .25)),
+    filter: (s: Structure) => (s.structureType === STRUCTURE_CONTAINER) && (_.sum((s as Container).store) > ((s as Container).storeCapacity * .05)),
   });
   if (container) {
     // Get energy from the container

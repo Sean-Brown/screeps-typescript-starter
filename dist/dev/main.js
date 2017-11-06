@@ -318,7 +318,7 @@ function creepBuildCost(bodyParts) {
 exports.creepBuildCost = creepBuildCost;
 function gatherEnergy(creep) {
     var container = creep.pos.findClosestByPath(FIND_STRUCTURES, {
-        filter: function (s) { return (s.structureType === STRUCTURE_CONTAINER) && (_.sum(s.store) > (s.storeCapacity * .25)); },
+        filter: function (s) { return (s.structureType === STRUCTURE_CONTAINER) && (_.sum(s.store) > (s.storeCapacity * .05)); },
     });
     if (container) {
         gatherFromContainer(creep, container);
