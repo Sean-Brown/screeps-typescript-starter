@@ -14,7 +14,7 @@ export function run(creep: Creep): void {
     return;
   }
   // Check if the creep is at capacity
-  if (_.sum(creep.carry) < creep.carryCapacity) {
+  if (creep.carry.energy && (creep.carry.energy < creep.carryCapacity)) {
     creepActions.harvestClosestSource(creep);
     return;
   }

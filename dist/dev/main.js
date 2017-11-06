@@ -299,11 +299,11 @@ function getEnergy(creep, roomObject) {
 exports.getEnergy = getEnergy;
 function canWork(creep) {
     var working = creep.memory.working;
-    if (working && _.sum(creep.carry) === 0) {
+    if (working && (creep.carry.energy === 0)) {
         creep.memory.working = false;
         return false;
     }
-    else if (!working && _.sum(creep.carry) === creep.carryCapacity) {
+    else if (!working && (creep.carry.energy === creep.carryCapacity)) {
         creep.memory.working = true;
         return true;
     }
@@ -944,7 +944,7 @@ var creepActions = __webpack_require__(1);
 var log_1 = __webpack_require__(0);
 function run(creep) {
     if (creepActions.needsRenew(creep)) {
-        if (_.sum(creep.carry) > 0) {
+        if (creep.carry.energy && (creep.carry.energy > 0)) {
             return true;
         }
         var spawn = creep.pos.findClosestByPath(FIND_MY_SPAWNS, {
@@ -1950,7 +1950,7 @@ function run(creep) {
     if (!baseCreep.run(creep)) {
         return;
     }
-    if (_.sum(creep.carry) < creep.carryCapacity) {
+    if (creep.carry.energy && (creep.carry.energy < creep.carryCapacity)) {
         creepActions.harvestClosestSource(creep);
         return;
     }
