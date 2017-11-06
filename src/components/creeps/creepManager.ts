@@ -99,12 +99,12 @@ function _buildMissingCreeps(room: Room, creeps: Creep[]) {
       }
     }
     // Check if we need more builders
-    if (builders.length < (harvesters.length * .5)) {
+    if (builders.length < (numHarvesters * .5)) {
       const body = builder.getBody(room);
       const cost = _calcBodyCost(body);
       if (available >= cost) {
         _.each(spawns, (spawn: Spawn) => {
-          _spawnCreep(spawn, body, Roles.Harvester);
+          _spawnCreep(spawn, body, Roles.Builder);
         });
       }
     }
@@ -114,7 +114,7 @@ function _buildMissingCreeps(room: Room, creeps: Creep[]) {
       const cost = _calcBodyCost(body);
       if (available >= cost) {
         _.each(spawns, (spawn: Spawn) => {
-          _spawnCreep(spawn, body, Roles.Harvester);
+          _spawnCreep(spawn, body, Roles.Repairer);
         });
       }
     }
