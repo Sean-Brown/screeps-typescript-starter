@@ -316,6 +316,23 @@ function creepBuildCost(bodyParts) {
     return bodyParts.reduce(function (cost, part) { return cost + BODYPART_COST[part]; }, 0);
 }
 exports.creepBuildCost = creepBuildCost;
+function gatherEnergy(creep) {
+    var container = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+        filter: function (s) { return (s.structureType === STRUCTURE_CONTAINER) && (s.store > s.storeCapacity * .25); },
+    });
+    if (container) {
+        gatherFromContainer(creep, container);
+    }
+    else {
+        harvestClosestSource(creep);
+    }
+}
+exports.gatherEnergy = gatherEnergy;
+function gatherFromContainer(creep, container) {
+    if (creep.withdraw(container, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+        creep.moveTo(container.pos);
+    }
+}
 function harvestClosestSource(creep) {
     var sources = creep.room.find(FIND_SOURCES);
     if (sources.length) {
@@ -1898,7 +1915,7 @@ function run(creep) {
         }
     }
     else {
-        creepActions.harvestClosestSource(creep);
+        creepActions.gatherEnergy(creep);
     }
 }
 exports.run = run;
@@ -2055,7 +2072,7 @@ function run(creep) {
         log_1.log.warning("idle repairer " + creep.name);
     }
     else {
-        creepActions.harvestClosestSource(creep);
+        creepActions.gatherEnergy(creep);
     }
 }
 exports.run = run;

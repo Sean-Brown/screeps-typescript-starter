@@ -118,6 +118,6 @@ export function run(creep: Creep): void {
 
     log.warning(`idle repairer ${creep.name}`);
   } else {
-    creepActions.harvestClosestSource(creep);
+    creepActions.gatherEnergy(creep);
   }
 }

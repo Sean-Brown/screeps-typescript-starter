@@ -103,6 +103,33 @@ export function creepBuildCost(bodyParts: string[]): number {
   return bodyParts.reduce((cost, part) => cost + BODYPART_COST[part], 0);
 }
 
+/**
+ * Gather energy from the nearest storage container or energy source
+ * @param {Creep} creep
+ */
+export function gatherEnergy(creep: Creep) {
+  const container = creep.pos.findClosestByPath<Container>(FIND_STRUCTURES, {
+    filter: (s: Structure) => (s.structureType === STRUCTURE_CONTAINER) && ((s as Container).store > (s as Container).storeCapacity * .25),
+  });
+  if (container) {
+    // Get energy from the container
+    gatherFromContainer(creep, container);
+  } else {
+    // Get energy from the closest source
+    harvestClosestSource(creep);
+  }
+}
+
+function gatherFromContainer(creep: Creep, container: Container) {
+  if (creep.withdraw(container, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+    creep.moveTo(container.pos);
+  }
+}
+
+/**
+ * Harvest the closest source to the creep
+ * @param {Creep} creep
+ */
 export function harvestClosestSource(creep: Creep) {
   let sources = creep.room.find<Source>(FIND_SOURCES);
   if (sources.length) {

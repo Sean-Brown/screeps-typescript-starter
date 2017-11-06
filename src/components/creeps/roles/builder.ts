@@ -35,6 +35,6 @@ export function run(creep: Creep): void {
       }
     }
   } else {
-    creepActions.harvestClosestSource(creep);
+    creepActions.gatherEnergy(creep);
   }
 }
