@@ -1786,7 +1786,8 @@ function _buildMissingCreeps(room, creeps) {
             log_1.log.debug("Spawn: " + spawns[0].name);
         }
     }
-    if (!creeps.some(function (creep) { return creepActions.needsRenew(creep); })) {
+    if (!creeps.some(function (creep) { return creepActions.needsRenew(creep); }) ||
+        spawns.some(function (s) { return s.energy === s.energyCapacity; })) {
         var available = room.energyAvailable;
         var numHarvesters = harvesters.length;
         if (numHarvesters < getMaxHarvesters(room)) {

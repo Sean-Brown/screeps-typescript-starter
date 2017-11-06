@@ -82,7 +82,10 @@ function _buildMissingCreeps(room: Room, creeps: Creep[]) {
   }
 
   // Check if we should build more units
-  if (!creeps.some((creep: Creep) => creepActions.needsRenew(creep))) {
+  if (
+    !creeps.some((creep: Creep) => creepActions.needsRenew(creep)) ||
+    spawns.some((s: Spawn) => s.energy === s.energyCapacity)
+  ) {
     const available = room.energyAvailable;
     // Check if we need more harvesters
     const numHarvesters = harvesters.length;
