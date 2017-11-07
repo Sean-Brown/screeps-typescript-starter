@@ -55,6 +55,7 @@ function getMaxHarvesters(room: Room): number {
     case 1: return Config.BUILD_LEVELS.LEVEL_1.HARVESTERS;
     case 2: return Config.BUILD_LEVELS.LEVEL_2.HARVESTERS;
     case 3: return Config.BUILD_LEVELS.LEVEL_3.HARVESTERS;
+    case 4: return Config.BUILD_LEVELS.LEVEL_4.HARVESTERS;
     default: return Number.MAX_VALUE;
   }
 }
