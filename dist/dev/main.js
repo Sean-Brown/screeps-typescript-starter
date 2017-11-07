@@ -945,6 +945,9 @@ exports.BUILD_LEVELS = {
     LEVEL_3: {
         HARVESTERS: 8,
     },
+    LEVEL_4: {
+        HARVESTERS: 12,
+    },
 };
 
 
@@ -1938,6 +1941,7 @@ function getBody(room) {
         case 1: return [WORK, CARRY, MOVE];
         case 2: return [WORK, WORK, CARRY, MOVE];
         case 3: return [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+        case 4: return [WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
     }
 }
 exports.getBody = getBody;
@@ -2019,6 +2023,7 @@ function getBody(room) {
         case 1: return [WORK, CARRY, MOVE];
         case 2: return [WORK, WORK, CARRY, MOVE];
         case 3: return [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+        case 4: return [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
     }
 }
 exports.getBody = getBody;
