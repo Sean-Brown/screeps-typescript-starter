@@ -948,6 +948,9 @@ exports.BUILD_LEVELS = {
     LEVEL_4: {
         HARVESTERS: 12,
     },
+    LEVEL_5: {
+        HARVESTERS: 14,
+    },
 };
 
 
@@ -1777,6 +1780,7 @@ function getMaxHarvesters(room) {
         case 2: return Config.BUILD_LEVELS.LEVEL_2.HARVESTERS;
         case 3: return Config.BUILD_LEVELS.LEVEL_3.HARVESTERS;
         case 4: return Config.BUILD_LEVELS.LEVEL_4.HARVESTERS;
+        case 5: return Config.BUILD_LEVELS.LEVEL_5.HARVESTERS;
         default: return Number.MAX_VALUE;
     }
 }
@@ -1943,6 +1947,7 @@ function getBody(room) {
         case 2: return [WORK, WORK, CARRY, MOVE];
         case 3: return [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
         case 4: return [WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
+        case 5: return [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];
     }
 }
 exports.getBody = getBody;
@@ -2025,6 +2030,7 @@ function getBody(room) {
         case 2: return [WORK, WORK, CARRY, MOVE];
         case 3: return [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
         case 4: return [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
+        case 5: return [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];
     }
 }
 exports.getBody = getBody;
@@ -2143,6 +2149,8 @@ function getBody(room) {
         case 1: return [WORK, CARRY, MOVE];
         case 2: return [WORK, WORK, CARRY, MOVE];
         case 3: return [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+        case 4: return [WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
+        case 5: return [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];
     }
 }
 exports.getBody = getBody;

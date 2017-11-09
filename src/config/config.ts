@@ -72,4 +72,7 @@ export const BUILD_LEVELS = {
   LEVEL_4: {
     HARVESTERS: 12,
   },
+  LEVEL_5: {
+    HARVESTERS: 14,
+  },
 };

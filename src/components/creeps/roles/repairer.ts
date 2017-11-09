@@ -133,5 +133,7 @@ export function getBody(room: Room): string[] {
     case 1: return [WORK, CARRY, MOVE];
     case 2: return [WORK, WORK, CARRY, MOVE];
     case 3: return [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE];
+    case 4: return [WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE];
+    case 5: return [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE];
   }
 }
